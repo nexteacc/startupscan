@@ -6,10 +6,18 @@ import ResultsView from "./components/ResultsView";
 import { SignIn, SignedIn, SignedOut, useClerk } from "@clerk/clerk-react";
 
 function App() {
-  const { signOut, user } = useClerk();  // 添加 user
-  const [cameraState, setCameraState] = useState<"idle" | "active" | "error" | "results">("idle");
+  const { signOut, user } = useClerk(); // 添加 user
+  const [cameraState, setCameraState] = useState<
+    "idle" | "active" | "error" | "results"
+  >("idle");
   const [ideas, setIdeas] = useState<
-    Array<{ source: string; strategy: string; marketing: string; market_potential: string; target_audience: string }>
+    Array<{
+      source: string;
+      strategy: string;
+      marketing: string;
+      market_potential: string;
+      target_audience: string;
+    }>
   >([]);
   const [errorMessage, setErrorMessage] = useState("");
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
@@ -27,13 +35,14 @@ function App() {
     try {
       setIsLoading(true);
 
-      // 验证图片数据
+      //  验证图片数据
       if (!image || image.length < 100) {
         throw new Error("图片数据无效");
       }
       // 使用 import.meta.env 访问环境变量
       const imgbbApiKey = import.meta.env.VITE_IMGBB_API_KEY;
-    
+      console.log("IMGBB API Key:", imgbbApiKey);
+
       if (!user) {
         throw new Error("用户未登录");
       }
@@ -45,10 +54,13 @@ function App() {
       const formData = new FormData();
       formData.append("image", image.split(",")[1]); // 去掉 Base64 前缀
 
-      const response = await fetch(`https://api.imgbb.com/1/upload?expiration=300&key=${imgbbApiKey}`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `https://api.imgbb.com/1/upload?expiration=300&key=${imgbbApiKey}`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const result = await response.json(); // 解析返回的结果
       console.log("ImgBB 上传结果:", result);
@@ -61,30 +73,7 @@ function App() {
       const imageUrl = result.data.url;
       console.log("图片上传成功，URL:", imageUrl);
 
-      // 调用后端API处理图片
-      const apiResponse = await fetch('https://api.yourdomain.com/analyze-image', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user.id}` // 使用用户ID作为简单的认证
-        },
-        body: JSON.stringify({
-          imageUrl,
-          userId
-        })
-      });
-      
-      if (!apiResponse.ok) {
-        throw new Error("分析请求失败");
-      }
-      
-      const analysisResult = await apiResponse.json();
-      console.log("分析结果:", analysisResult);
-      
-      // 更新ideas状态，显示分析结果
-      setIdeas(analysisResult.ideas || []);
-      setCameraState("results");
-
+      // 这里可以调用后端的大模型，传递 imageUrl
     } catch (error) {
       console.error("错误:", error);
 
@@ -107,7 +96,6 @@ function App() {
       setIsLoading(false);
     }
   };
-  
 
   return (
     <>
@@ -115,12 +103,17 @@ function App() {
         {cameraState === "active" ? (
           <CameraView onExit={handleExit} onCapture={handleCapture} />
         ) : cameraState === "results" ? (
-          <ResultsView ideas={ideas} onRetake={() => setCameraState("active")} />
+          <ResultsView
+            ideas={ideas}
+            onRetake={() => setCameraState("active")}
+          />
         ) : (
           <div className="relative w-full h-full">
             <AuroraBackground>
               <div className="relative w-full h-full flex flex-col items-center justify-center">
-                {cameraState === "error" && <div className="text-red-500 mb-4">{errorMessage}</div>}
+                {cameraState === "error" && (
+                  <div className="text-red-500 mb-4">{errorMessage}</div>
+                )}
                 {isLoading && <div className="mb-4">灵感收集中，请稍候...</div>}
                 {!isLoading && cameraState === "idle" && (
                   <CameraButton
@@ -148,7 +141,11 @@ function App() {
                       stroke="currentColor"
                       className="w-5 h-5"
                     >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                      />
                     </svg>
                   </div>
                 </div>
