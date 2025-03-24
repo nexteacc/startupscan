@@ -20,7 +20,7 @@ export const CameraView = ({ onExit, onCapture }: CameraViewProps) => {
             facingMode: "environment",
             width: { ideal: 1920 },
             height: { ideal: 1080 },
-            focusMode: "continuous" // 启用连续自动对焦
+
           },
         });
         setStream(mediaStream);
