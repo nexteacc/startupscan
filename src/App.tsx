@@ -26,31 +26,72 @@ function App() {
   const handleCapture = async (image: string) => {
     try {
       setIsLoading(true);
-      
+
       // 验证图片数据
       if (!image || image.length < 100) {
         throw new Error("图片数据无效");
       }
-      console.log("成功获取图片，大小:", image.length);
-      console.log("用户信息:", user);
-  
+      // 使用 import.meta.env 访问环境变量
+      const imgbbApiKey = import.meta.env.VITE_IMGBB_API_KEY;
+    
       if (!user) {
         throw new Error("用户未登录");
       }
 
-
-      const userId = user.id; 
+      const userId = user.id;
       console.log("用户 ID:", userId);
-  
-  
-    } catch (error) {
-      console.error("API 错误:", error); 
-      
-      if (error instanceof Error) {
-        setErrorMessage(error.message); 
+
+      // 上传图片到 ImgBB，并设置过期时间为 5 分钟
+      const formData = new FormData();
+      formData.append("image", image.split(",")[1]); // 去掉 Base64 前缀
+
+      const response = await fetch(`https://api.imgbb.com/1/upload?expiration=300&key=${imgbbApiKey}`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.json(); // 解析返回的结果
+      console.log("ImgBB 上传结果:", result);
+
+      if (!result.success) {
+        throw new Error("图片上传失败");
       }
-  
+
+      // 获取图片的直接访问 URL
+      const imageUrl = result.data.url;
+      console.log("图片上传成功，URL:", imageUrl);
+
+      // 调用后端API处理图片
+      const apiResponse = await fetch('https://api.yourdomain.com/analyze-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${user.id}` // 使用用户ID作为简单的认证
+        },
+        body: JSON.stringify({
+          imageUrl,
+          userId
+        })
+      });
       
+      if (!apiResponse.ok) {
+        throw new Error("分析请求失败");
+      }
+      
+      const analysisResult = await apiResponse.json();
+      console.log("分析结果:", analysisResult);
+      
+      // 更新ideas状态，显示分析结果
+      setIdeas(analysisResult.ideas || []);
+      setCameraState("results");
+
+    } catch (error) {
+      console.error("错误:", error);
+
+      if (error instanceof Error) {
+        setErrorMessage(error.message);
+      }
+
       setIdeas([
         {
           source: "灵感待发现",
@@ -60,7 +101,7 @@ function App() {
           target_audience: "未知",
         },
       ]);
-      
+
       setCameraState("results");
     } finally {
       setIsLoading(false);

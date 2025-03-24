@@ -1,5 +1,4 @@
-import { useCallback, useRef, useState } from "react";
-import Webcam from "react-webcam";
+import { useEffect, useRef, useState } from "react";
 
 interface CameraViewProps {
   onExit: () => void;
@@ -7,20 +6,60 @@ interface CameraViewProps {
 }
 
 export const CameraView = ({ onExit, onCapture }: CameraViewProps) => {
-  const webcamRef = useRef<Webcam>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const capture = useCallback(() => {
-    const imageSrc = webcamRef.current?.getScreenshot();
-    if (imageSrc) {
-      setPreviewImage(imageSrc);
-      // 检查是否成功获取到图片
-      console.log("拍照成功，图片大小:", imageSrc.length);
-      onCapture?.(imageSrc);  // 调用父组件的处理函数
-    } else {
-      console.error("拍照失败：未能获取图片");
+  useEffect(() => {
+    const startCamera = async () => {
+      try {
+        
+        const mediaStream = await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "environment",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            focusMode: "continuous" // 启用连续自动对焦
+          },
+        });
+        setStream(mediaStream);
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+      } catch (error) {
+        console.error("Error accessing camera:", error);
+      }
+    };
+
+    startCamera();
+
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, []);
+
+  const capture = () => {
+    if (canvasRef.current && videoRef.current) {
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+      
+      // 设置canvas尺寸与视频实际尺寸匹配
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      
+      const context = canvas.getContext("2d");
+      if (context) {
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // 使用0.8的质量参数，平衡图像质量和文件大小
+        const imageSrc = canvas.toDataURL("image/jpeg", 0.9);
+        setPreviewImage(imageSrc);
+        onCapture?.(imageSrc);
+      }
     }
-  }, [onCapture]);
+  };
 
   return (
     <div className="flex flex-col items-center justify-start min-h-screen pt-12 pb-8 bg-zinc-50 dark:bg-zinc-900">
@@ -28,16 +67,18 @@ export const CameraView = ({ onExit, onCapture }: CameraViewProps) => {
         {previewImage ? (
           <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
         ) : (
-          <Webcam
-            ref={webcamRef}
-            audio={false}
-            screenshotFormat="image/jpeg"
-            videoConstraints={{
-              facingMode: "environment",
+          <video 
+            ref={videoRef} 
+            autoPlay 
+            playsInline
+            muted
+            onLoadedMetadata={() => {
+              if (videoRef.current) videoRef.current.play();
             }}
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover" 
           />
         )}
+        <canvas ref={canvasRef} className="hidden" width={1920} height={1080} />
 
         <div className="absolute bottom-8 left-0 right-0 flex justify-center space-x-6">
           <button
