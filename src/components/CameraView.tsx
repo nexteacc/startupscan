@@ -46,14 +46,14 @@ export const CameraView = ({ onExit, onCapture }: CameraViewProps) => {
       const video = videoRef.current;
       const canvas = canvasRef.current;
       
-      // 设置canvas尺寸与视频实际尺寸匹配
+
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
       
       const context = canvas.getContext("2d");
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        // 使用0.8的质量参数，平衡图像质量和文件大小
+
         const imageSrc = canvas.toDataURL("image/jpeg", 0.9);
         setPreviewImage(imageSrc);
         onCapture?.(imageSrc);
