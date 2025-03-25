@@ -15,13 +15,13 @@ interface Idea {
 }
 
 function App() {
-  const { signOut, user } = useClerk(); 
+  const { signOut, user } = useClerk();
   const [cameraState, setCameraState] = useState<
     "idle" | "active" | "error" | "results"
   >("idle");
 
   const [ideas, setIdeas] = useState<Idea[]>([]);
-  
+
   const [errorMessage, setErrorMessage] = useState("");
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,80 +42,76 @@ function App() {
     };
   }
 
-  const handleCapture = useCallback(async (image: string) => {
-    try {
-      setIsLoading(true);
+  const handleCapture = useCallback(
+    async (image: string) => {
+      try {
+        setIsLoading(true);
 
-      // 验证图片数据
-      if (!image || image.length < 100) {
-        throw new Error("图片数据无效");
-      }
-      // 使用 import.meta.env 访问环境变量
-      const picgoApiKey = import.meta.env.VITE_PICGO_API_KEY;
-      if (!picgoApiKey) {
-        throw new Error("API key未配置");
-      }
+        // 验证图片数据
+        if (!image || image.length < 100) {
+          throw new Error("图片数据无效");
+        }
+        // 使用 import.meta.env 访问环境变量
+        const picgoApiKey = import.meta.env.VITE_PICGO_API_KEY;
+        if (!picgoApiKey) {
+          throw new Error("API key未配置");
+        }
 
-      if (!user) {
-        throw new Error("用户未登录");
-      }
+        if (!user) {
+          throw new Error("用户未登录");
+        }
 
+        // 上传图片到 PicGo
+        const formData = new FormData();
+        const base64Data = image.split(",")[1];
+        if (!base64Data) {
+          throw new Error("無效的Base64圖片數據");
+        }
+        formData.append("source", base64Data);
+        formData.append("expiration", "PT5M");
 
-      // 上传图片到 PicGo
-      const formData = new FormData();
-      const base64Data = image.split(",")[1];
-      if (!base64Data) {
-        throw new Error("無效的Base64圖片數據");
-      }
-      formData.append("source", base64Data);
-      formData.append("expiration", "PT5M"); 
-
-      const response = await fetch(
-        `https://www.picgo.net/api/1/upload`, 
-        {
+        const response = await fetch(`https://www.picgo.net/api/1/upload`, {
           method: "POST",
           headers: {
             "X-API-Key": picgoApiKey,
           },
           body: formData,
+        });
+
+        if (!response.ok) {
+          const error = await response.json();
+          throw new Error(error.message || "圖片上傳失敗");
         }
-      );
 
+        const result = (await response.json()) as PicGoResponse;
+        const imageUrl = result.image.url;
+        console.log("图片上传成功，URL:", imageUrl);
 
+        // 这里可以调用后端的大模型，传递 imageUrl
+      } catch (error) {
+        console.error("错误:", error);
 
-      if (!response.ok) { 
-        const error = await response.json();
-        throw new Error(error.message || "圖片上傳失敗");
+        if (error instanceof Error) {
+          setErrorMessage(error.message);
+        }
+
+        setIdeas([
+          {
+            source: "灵感待发现",
+            strategy: "正在收集更多灵感...",
+            marketing: "稍后再试",
+            market_potential: "未知",
+            target_audience: "未知",
+          },
+        ]);
+
+        setCameraState("results");
+      } finally {
+        setIsLoading(false);
       }
-
- 
-      const result = await response.json() as PicGoResponse;
-      const imageUrl = result.image.url;
-      console.log("图片上传成功，URL:", imageUrl);
-
-      // 这里可以调用后端的大模型，传递 imageUrl
-    } catch (error) {
-      console.error("错误:", error);
-
-      if (error instanceof Error) {
-        setErrorMessage(error.message);
-      }
-
-      setIdeas([
-        {
-          source: "灵感待发现",
-          strategy: "正在收集更多灵感...",
-          marketing: "稍后再试",
-          market_potential: "未知",
-          target_audience: "未知",
-        },
-      ]);
-
-      setCameraState("results");
-    } finally {
-      setIsLoading(false);
-    }
-  }, [user]);
+    },
+    [user]
+  );
 
   return (
     <>

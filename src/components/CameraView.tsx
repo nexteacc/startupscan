@@ -14,13 +14,11 @@ export const CameraView = ({ onExit, onCapture }: CameraViewProps) => {
   useEffect(() => {
     const startCamera = async () => {
       try {
- 
         const mediaStream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: "environment",
             width: { ideal: 1920 },
             height: { ideal: 1080 },
-
           },
         });
         setStream(mediaStream);
@@ -45,15 +43,15 @@ export const CameraView = ({ onExit, onCapture }: CameraViewProps) => {
     if (canvasRef.current && videoRef.current) {
       const video = videoRef.current;
       const canvas = canvasRef.current;
-      
 
+      // 设置canvas尺寸与视频实际尺寸匹配
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      
+
       const context = canvas.getContext("2d");
       if (context) {
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
+        // 使用0.8的质量参数，平衡图像质量和文件大小
         const imageSrc = canvas.toDataURL("image/jpeg", 0.9);
         setPreviewImage(imageSrc);
         onCapture?.(imageSrc);
@@ -65,17 +63,21 @@ export const CameraView = ({ onExit, onCapture }: CameraViewProps) => {
     <div className="flex flex-col items-center justify-start min-h-screen pt-12 pb-8 bg-zinc-50 dark:bg-zinc-900">
       <div className="relative w-full max-w-2xl aspect-[3/4] bg-black rounded-2xl overflow-hidden">
         {previewImage ? (
-          <img src={previewImage} alt="Preview" className="w-full h-full object-cover" />
+          <img
+            src={previewImage}
+            alt="Preview"
+            className="w-full h-full object-cover"
+          />
         ) : (
-          <video 
-            ref={videoRef} 
-            autoPlay 
+          <video
+            ref={videoRef}
+            autoPlay
             playsInline
             muted
             onLoadedMetadata={() => {
               if (videoRef.current) videoRef.current.play();
             }}
-            className="w-full h-full object-cover" 
+            className="w-full h-full object-cover"
           />
         )}
         <canvas ref={canvasRef} className="hidden" width={1920} height={1080} />
