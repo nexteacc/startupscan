@@ -45,7 +45,7 @@ function App() {
   const handleCapture = useCallback(
     async (image: string) => {
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 15000); // 设置15秒超时
+      const timeoutId = setTimeout(() => controller.abort(), 30000);
 
       try {
         setIsLoading(true);
