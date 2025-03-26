@@ -88,15 +88,16 @@ function App() {
         const imageUrl = result.image.url;
         console.log("Image uploaded successfully, URL:", imageUrl);
 
-        
+        const testUserId = "user_2MZ45q577671Xx24rYt4";
+        const testImageUrl = "https://img.picgo.net/2025/03/25/e4d6cbefb4544e87b2deb9d13383a5d12d291bc66b93b696.jpg";
         const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({ 
-            userId: user.id, 
-            image_url: imageUrl 
+            userId: testUserId, 
+            image_url: testImageUrl 
           }),
           signal: controller.signal, 
         });
