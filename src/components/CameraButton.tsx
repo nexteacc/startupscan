@@ -8,12 +8,12 @@ export const CameraButton = ({ onCameraStart, onError }: CameraButtonProps) => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: "environment", // 优先使用后置摄像头
+          facingMode: "environment", 
         },
       });
       onCameraStart(stream);
     } catch (error) {
-      onError("无法访问相机，请确保已授予相机权限");
+      onError("Cannot access camera. Please make sure camera permission is granted");
     }
   };
 

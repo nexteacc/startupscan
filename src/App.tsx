@@ -47,25 +47,22 @@ function App() {
       try {
         setIsLoading(true);
 
-        // 验证图片数据
         if (!image || image.length < 100) {
-          throw new Error("图片数据无效");
+          throw new Error("Invalid image data");
         }
-        // 使用 import.meta.env 访问环境变量
         const picgoApiKey = import.meta.env.VITE_PICGO_API_KEY;
         if (!picgoApiKey) {
-          throw new Error("API key未配置");
+          throw new Error("API key not configured");
         }
 
         if (!user) {
-          throw new Error("用户未登录");
+          throw new Error("User not logged in");
         }
 
-        // 上传图片到 PicGo
         const formData = new FormData();
         const base64Data = image.split(",")[1];
         if (!base64Data) {
-          throw new Error("無效的Base64圖片數據");
+          throw new Error("Invalid Base64 image data");
         }
         formData.append("source", base64Data);
         formData.append("expiration", "PT5M");
@@ -80,16 +77,15 @@ function App() {
 
         if (!response.ok) {
           const error = await response.json();
-          throw new Error(error.message || "圖片上傳失敗");
+          throw new Error(error.message || "Image upload failed");
         }
 
         const result = (await response.json()) as PicGoResponse;
         const imageUrl = result.image.url;
-        console.log("图片上传成功，URL:", imageUrl);
+        console.log("Image uploaded successfully, URL:", imageUrl);
 
-        // 这里可以调用后端的大模型，传递 imageUrl
       } catch (error) {
-        console.error("错误:", error);
+        console.error("Error:", error);
 
         if (error instanceof Error) {
           setErrorMessage(error.message);
@@ -97,11 +93,11 @@ function App() {
 
         setIdeas([
           {
-            source: "灵感待发现",
-            strategy: "正在收集更多灵感...",
-            marketing: "稍后再试",
-            market_potential: "未知",
-            target_audience: "未知",
+            source: "Discovering",
+            strategy: "Collecting more inspiration...",
+            marketing: "Try again later",
+            market_potential: "Unknown",
+            target_audience: "Unknown",
           },
         ]);
 
@@ -130,7 +126,7 @@ function App() {
                 {cameraState === "error" && (
                   <div className="text-red-500 mb-4">{errorMessage}</div>
                 )}
-                {isLoading && <div className="mb-4">灵感收集中，请稍候...</div>}
+                {isLoading && <div className="mb-4">Collecting inspiration, please wait...</div>}
                 {!isLoading && cameraState === "idle" && (
                   <CameraButton
                     onCameraStart={(stream) => {
@@ -165,7 +161,7 @@ function App() {
                     </svg>
                   </div>
                 </div>
-                <span>退出</span>
+                <span>Sign Out</span>
               </button>
             </div>
           </div>
