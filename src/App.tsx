@@ -88,7 +88,7 @@ function App() {
         const imageUrl = result.image.url;
         console.log("Image uploaded successfully, URL:", imageUrl);
 
-        const testUserId = "test_user_123";  // 固定用户ID
+        const testUserId = "test_user_235";  // 固定用户ID
         const testImageUrl = "https://img.picgo.net/2025/03/25/e4d6cbefb4544e87b2deb9d13383a5d12d291bc66b93b696.jpg";  // 固定图片URL
         const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
           method: 'POST',
