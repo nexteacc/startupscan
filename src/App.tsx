@@ -117,14 +117,12 @@ throw new Error("Daily request limit reached, please try again tomorrow");
         setIdeas(ideasResult.ideas);
 
       } catch (error) {
-        if (error.name === 'AbortError') {
-          console.error("Request timed out");
-          setErrorMessage("Request timed out, please try again later");
-        } else {
+        if (error instanceof Error) {
           console.error("Error:", error);
-          if (error instanceof Error) {
-            setErrorMessage(error.message);
-          }
+          setErrorMessage(error.message);
+        } else {
+          console.error("Unknown error:", error);
+          setErrorMessage("An unknown error occurred");
         }
 
         setIdeas([
