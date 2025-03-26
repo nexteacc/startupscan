@@ -44,8 +44,12 @@ function App() {
 
   const handleCapture = useCallback(
     async (image: string) => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 15000); // 设置15秒超时
+
       try {
         setIsLoading(true);
+        setErrorMessage(""); 
 
         if (!image || image.length < 100) {
           throw new Error("Invalid image data");
@@ -84,11 +88,43 @@ function App() {
         const imageUrl = result.image.url;
         console.log("Image uploaded successfully, URL:", imageUrl);
 
-      } catch (error) {
-        console.error("Error:", error);
+        const testUserId = "test_user_123";  // 固定用户ID
+        const testImageUrl = "https://img.picgo.net/2025/03/25/e4d6cbefb4544e87b2deb9d13383a5d12d291bc66b93b696.jpg";  // 固定图片URL
+        const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ 
+            userId: testUserId, 
+            image_url: testImageUrl 
+          }),
+          signal: controller.signal, 
+        });
 
-        if (error instanceof Error) {
-          setErrorMessage(error.message);
+        clearTimeout(timeoutId);
+
+        if (!ideasResponse.ok) {
+          const error = await ideasResponse.json();
+         
+          if (ideasResponse.status === 429) {
+throw new Error("Daily request limit reached, please try again tomorrow");
+          }
+          throw new Error(error.error || "Failed to analyze image");
+        }
+
+        const ideasResult = await ideasResponse.json();
+        setIdeas(ideasResult.ideas);
+
+      } catch (error) {
+        if (error.name === 'AbortError') {
+          console.error("Request timed out");
+          setErrorMessage("Request timed out, please try again later");
+        } else {
+          console.error("Error:", error);
+          if (error instanceof Error) {
+            setErrorMessage(error.message);
+          }
         }
 
         setIdeas([
