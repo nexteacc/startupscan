@@ -34,13 +34,7 @@ function App() {
     }
   }, [mediaStream]);
 
-  interface PicGoResponse {
-    success: boolean;
-    message?: string;
-    image: {
-      url: string;
-    };
-  }
+
 
   const handleCapture = useCallback(
     async (image: string) => {
@@ -84,12 +78,14 @@ function App() {
           throw new Error(error.message || "Image upload failed");
         }
 
-        const result = (await response.json()) as PicGoResponse;
-        const imageUrl = result.image.url;
-        console.log("Image uploaded successfully, URL:", imageUrl);
-
+        const result = await response.json();
+        const imageUrl = result?.display_url || result?.image?.url;
+        if (!imageUrl) {
+          throw new Error("Invalid image URL in response");
+        }
+        
         const testUserId = "user_2MZ45q577671Xx24rYt4";
-        const testImageUrl = "https://img.picgo.net/2025/03/25/e4d6cbefb4544e87b2deb9d13383a5d12d291bc66b93b696.jpg";
+        //const testImageUrl = "https://img.picgo.net/2025/03/25/e4d6cbefb4544e87b2deb9d13383a5d12d291bc66b93b696.jpg";
         const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
           method: 'POST',
           headers: {
@@ -97,7 +93,7 @@ function App() {
           },
           body: JSON.stringify({ 
             userId: testUserId, 
-            image_url: testImageUrl 
+            image_url: imageUrl 
           }),
           signal: controller.signal, 
         });
