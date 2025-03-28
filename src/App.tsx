@@ -53,9 +53,10 @@ function App() {
           throw new Error("API key not configured");
         }
 
-        if (!user) {
-          throw new Error("User not logged in");
+        if (!user?.id) { 
+          throw new Error("User ID is missing");
         }
+        
 
         const formData = new FormData();
         const base64Data = image.split(",")[1];
@@ -79,20 +80,21 @@ function App() {
         }
 
         const result = await response.json();
-        const imageUrl = result?.display_url || result?.image?.url;
+        const imageUrl = result?.image?.url || result?.image?.display_url; 
         if (!imageUrl) {
           throw new Error("Invalid image URL in response");
         }
         
-        const testUserId = "user_2MZ45q577671Xx24rYt4";
+        //const testUserId = "user_2MZ45q577671Xx24rYt4";
         //const testImageUrl = "https://img.picgo.net/2025/03/25/e4d6cbefb4544e87b2deb9d13383a5d12d291bc66b93b696.jpg";
         const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
+          credentials: 'include', 
           body: JSON.stringify({ 
-            userId: testUserId, 
+            userId: user.id, 
             image_url: imageUrl 
           }),
           signal: controller.signal, 
