@@ -65,7 +65,7 @@ function App() {
         }
         formData.append("source", base64Data);
         formData.append("expiration", "PT5M");
-        formData.append("format", "txt");  
+        //formData.append("format", "txt");  
 
         const response = await fetch(`https://www.picgo.net/api/1/upload`, {
           method: "POST",
@@ -100,11 +100,12 @@ function App() {
 
         // const ideasResult = await ideasResponse.json();
         //setIdeas(ideasResult.ideas);
+        const responseJson = await response.json();
         
         setIdeas([
           {
             source: "测试模式",
-            strategy: `图片已上传至:`,
+            strategy: `API响应: ${JSON.stringify(responseJson, null, 2)}`,
             marketing: "测试营销信息",
             market_potential: "测试市场潜力",
             target_audience: "测试目标用户"
