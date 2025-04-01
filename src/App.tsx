@@ -73,22 +73,35 @@ const blob = new Blob([byteArray], { type: "image/png" });
 
 // 创建 FormData
 const formData = new FormData();
-formData.append("file", blob, "capture.png"); // 需要提供文件名
+const fileName = `capture-${Date.now()}.png`; // 生成唯一文件名
+formData.append("file", blob, fileName);
 
 // 发送到 GoFile.io
-const response = await fetch("https://store1.gofile.io/uploadFile", {
+const uploadResponse = await fetch("https://store1.gofile.io/uploadFile", {
   method: "POST",
   body: formData,
 });
 
-const responseJson = await response.json();
-console.log("GoFile.io Response:", responseJson);
+const uploadJson = await uploadResponse.json();
+console.log("GoFile.io Upload Response:", uploadJson);
 
-if (responseJson.status !== "ok") {
+if (uploadJson.status !== "ok") {
   throw new Error("Image upload failed");
 }
 
-const directImageUrl = responseJson.data.directLink;
+const fileId = uploadJson.data.fileId;
+
+// **调用 getServer API 获取文件服务器**
+const serverResponse = await fetch("https://api.gofile.io/getServer");
+const serverJson = await serverResponse.json();
+
+if (serverJson.status !== "ok") {
+  throw new Error("Failed to get GoFile server");
+}
+
+const server = serverJson.data.server;
+const directImageUrl = `https://${server}.gofile.io/download/${fileId}/${fileName}`;
+
 console.log("Direct Image URL:", directImageUrl);
         
         setIdeas([
