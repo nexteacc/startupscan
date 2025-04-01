@@ -36,78 +36,47 @@ function App() {
 
   const handleCapture = useCallback(
     async (image: string) => {
-      // const controller = new AbortController();
-      // const timeoutId = setTimeout(() => controller.abort(), 30000);
-
       try {
         setIsLoading(true);
-        setErrorMessage(""); 
+        setErrorMessage("");
 
         if (!image || image.length < 100) {
           throw new Error("Invalid image data");
         }
-        // const picgoApiKey = import.meta.env.VITE_PICGO_API_KEY;
-        // if (!picgoApiKey) {
-        //   throw new Error("API key not configured");
-        // }
 
-        if (!user?.id) { 
+        if (!user?.id) {
           throw new Error("User ID is missing");
         }
-        
 
-// 解析 Base64
-const base64Data = image.split(",")[1];
-if (!base64Data) {
-  throw new Error("Invalid Base64 image data");
-}
+        // 解析 Base64
+        const base64Data = image.split(",")[1];
+        if (!base64Data) {
+          throw new Error("Invalid Base64 image data");
+        }
 
-// Base64 转 Blob
-const byteCharacters = atob(base64Data);
-const byteNumbers = new Array(byteCharacters.length);
-for (let i = 0; i < byteCharacters.length; i++) {
-  byteNumbers[i] = byteCharacters.charCodeAt(i);
-}
-const byteArray = new Uint8Array(byteNumbers);
-const blob = new Blob([byteArray], { type: "image/png" });
+        // 上传到Cloudinary
+        const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`;
+        const formData = new FormData();
+        formData.append('file', `data:image/png;base64,${base64Data}`);
+        formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
 
-// 创建 FormData
-const formData = new FormData();
-const fileName = `capture-${Date.now()}.png`; // 生成唯一文件名
-formData.append("file", blob, fileName);
+        const response = await fetch(cloudinaryUrl, {
+          method: 'POST',
+          body: formData
+        });
 
-// 发送到 GoFile.io
-const uploadResponse = await fetch("https://store1.gofile.io/uploadFile", {
-  method: "POST",
-  body: formData,
-});
+        const responseJson = await response.json();
+        if (!response.ok) {
+          throw new Error(responseJson.message || "Image upload failed");
+        }
 
-const uploadJson = await uploadResponse.json();
-console.log("GoFile.io Upload Response:", uploadJson);
-
-if (uploadJson.status !== "ok") {
-  throw new Error("Image upload failed");
-}
-
-const fileId = uploadJson.data.fileId;
-
-// **调用 getServer API 获取文件服务器**
-const serverResponse = await fetch("https://api.gofile.io/getServer");
-const serverJson = await serverResponse.json();
-
-if (serverJson.status !== "ok") {
-  throw new Error("Failed to get GoFile server");
-}
-
-const server = serverJson.data.server;
-const directImageUrl = `https://${server}.gofile.io/download/${fileId}/${fileName}`;
-
-console.log("Direct Image URL:", directImageUrl);
+        // 获取安全URL（去掉https限制）
+        const imageUrl = responseJson.secure_url.replace('https://', 'http://');
         
         setIdeas([
           {
-            source: "测试模式",
-            strategy: `API响应: ${directImageUrl}`,
+            source: "Cloudinary上传",
+            strategy: `图片URL: ${imageUrl}`,
             marketing: "测试营销信息",
             market_potential: "测试市场潜力",
             target_audience: "测试目标用户"
@@ -115,44 +84,8 @@ console.log("Direct Image URL:", directImageUrl);
         ]);
         setCameraState("results");
 
-        // if (!response.ok) {
-        //   const error = await response.json();
-        //   throw new Error(error.message || "Image upload failed");
-        // }
-
-        //const imageUrl = await response.text(); 
-        
-        // const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json',
-        //   },
-        //   credentials: 'include', 
-        //   body: JSON.stringify({ 
-        //     userId: user.id, 
-        //     image_url: imageUrl 
-        //   }),
-        //   signal: controller.signal, 
-        // });
-
-        //clearTimeout(timeoutId);
-
-
-        // const ideasResult = await ideasResponse.json();
-        //setIdeas(ideasResult.ideas);
-
       } catch (error) {
-
-        setIdeas([
-          {
-            source: "你大爺3",
-            strategy: "为什么出错",
-            marketing: "Try again later",
-            market_potential: "Unknown",
-            target_audience: "Unknown",
-          },
-        ]);
-
+        setErrorMessage(error instanceof Error ? error.message : "Unknown error");
         setCameraState("results");
       } finally {
         setIsLoading(false);
