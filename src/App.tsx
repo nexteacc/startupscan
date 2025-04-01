@@ -80,7 +80,7 @@ function App() {
           throw new Error(error.message || "Image upload failed");
         }
 
-        const imageUrl = await response.text(); 
+        //const imageUrl = await response.text(); 
         
         // const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
         //   method: 'POST',
@@ -103,7 +103,7 @@ function App() {
         setIdeas([
           {
             source: "测试模式",
-            strategy: `图片已上传至: ${imageUrl}`,
+            strategy: `图片已上传至:`,
             marketing: "测试营销信息",
             market_potential: "测试市场潜力",
             target_audience: "测试目标用户"
