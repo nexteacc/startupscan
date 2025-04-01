@@ -46,32 +46,60 @@ function App() {
         if (!image || image.length < 100) {
           throw new Error("Invalid image data");
         }
-        const picgoApiKey = import.meta.env.VITE_PICGO_API_KEY;
-        if (!picgoApiKey) {
-          throw new Error("API key not configured");
-        }
+        // const picgoApiKey = import.meta.env.VITE_PICGO_API_KEY;
+        // if (!picgoApiKey) {
+        //   throw new Error("API key not configured");
+        // }
 
         if (!user?.id) { 
           throw new Error("User ID is missing");
         }
         
 
-        const formData = new FormData();
-        const base64Data = image.split(",")[1];
-        if (!base64Data) {
-          throw new Error("Invalid Base64 image data");
-        }
-        formData.append("source", base64Data);
-        formData.append("expiration", "PT5M");
-        //formData.append("format", "txt");  
+// 解析 Base64
+const base64Data = image.split(",")[1];
+if (!base64Data) {
+  throw new Error("Invalid Base64 image data");
+}
 
-        const response = await fetch(`https://www.picgo.net/api/1/upload`, {
-          method: "POST",
-          headers: {
-            "X-API-Key": picgoApiKey,
-          },
-          body: formData,
-        });
+// Base64 转 Blob
+const byteCharacters = atob(base64Data);
+const byteNumbers = new Array(byteCharacters.length);
+for (let i = 0; i < byteCharacters.length; i++) {
+  byteNumbers[i] = byteCharacters.charCodeAt(i);
+}
+const byteArray = new Uint8Array(byteNumbers);
+const blob = new Blob([byteArray], { type: "image/png" });
+
+// 创建 FormData
+const formData = new FormData();
+formData.append("file", blob, "capture.png"); // 需要提供文件名
+
+// 发送到 GoFile.io
+const response = await fetch("https://store1.gofile.io/uploadFile", {
+  method: "POST",
+  body: formData,
+});
+
+const responseJson = await response.json();
+console.log("GoFile.io Response:", responseJson);
+
+if (responseJson.status !== "ok") {
+  throw new Error("Image upload failed");
+}
+
+const imageUrl = responseJson.data.downloadPage; // 获取下载链接
+        
+        setIdeas([
+          {
+            source: "测试模式",
+            strategy: `API响应: ${imageUrl}`,
+            marketing: "测试营销信息",
+            market_potential: "测试市场潜力",
+            target_audience: "测试目标用户"
+          }
+        ]);
+        setCameraState("results");
 
         // if (!response.ok) {
         //   const error = await response.json();
@@ -98,18 +126,6 @@ function App() {
 
         // const ideasResult = await ideasResponse.json();
         //setIdeas(ideasResult.ideas);
-        const responseJson = await response.json();
-        
-        setIdeas([
-          {
-            source: "测试模式",
-            strategy: `API响应: ${JSON.stringify(responseJson, null, 2)}`,
-            marketing: "测试营销信息",
-            market_potential: "测试市场潜力",
-            target_audience: "测试目标用户"
-          }
-        ]);
-        setCameraState("results");
 
       } catch (error) {
 
