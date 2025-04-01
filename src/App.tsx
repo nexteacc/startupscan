@@ -48,13 +48,13 @@ function App() {
           throw new Error("User ID is missing");
         }
 
-        // 解析 Base64
+
         const base64Data = image.split(",")[1];
         if (!base64Data) {
           throw new Error("Invalid Base64 image data");
         }
 
-        // 上传到Cloudinary
+
         const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`;
         const formData = new FormData();
         formData.append('file', `data:image/png;base64,${base64Data}`);
@@ -70,18 +70,27 @@ function App() {
           throw new Error(responseJson.message || "Image upload failed");
         }
 
-        // 获取安全URL（去掉https限制）
-        const imageUrl = responseJson.secure_url.replace('https://', 'http://');
+
+        const imageUrl = responseJson.secure_url;
+
         
-        setIdeas([
-          {
-            source: "Cloudinary上传",
-            strategy: `图片URL: ${imageUrl}`,
-            marketing: "测试营销信息",
-            market_potential: "测试市场潜力",
-            target_audience: "测试目标用户"
-          }
-        ]);
+        const ideasResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze-image`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId: user?.id,
+            image_url: imageUrl
+          })
+        });
+        
+        if (!ideasResponse.ok) {
+          throw new Error('Analysis failed');
+        }
+        
+        const ideasResult = await ideasResponse.json();
+        setIdeas(ideasResult.ideas || []);
         setCameraState("results");
 
       } catch (error) {
