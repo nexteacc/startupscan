@@ -82,32 +82,34 @@ function App() {
 
         const imageUrl = await response.text(); 
         
-        const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include', 
-          body: JSON.stringify({ 
-            userId: user.id, 
-            image_url: imageUrl 
-          }),
-          signal: controller.signal, 
-        });
+        // const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
+        //   method: 'POST',
+        //   headers: {
+        //     'Content-Type': 'application/json',
+        //   },
+        //   credentials: 'include', 
+        //   body: JSON.stringify({ 
+        //     userId: user.id, 
+        //     image_url: imageUrl 
+        //   }),
+        //   signal: controller.signal, 
+        // });
 
-        clearTimeout(timeoutId);
+        //clearTimeout(timeoutId);
 
-        if (!ideasResponse.ok) {
-          const error = await ideasResponse.json();
-         
-          if (ideasResponse.status === 429) {
-throw new Error("Daily request limit reached, please try again tomorrow");
+
+        // const ideasResult = await ideasResponse.json();
+        //setIdeas(ideasResult.ideas);
+        setIdeas([
+          {
+            source: "测试模式",
+            strategy: `图片已上传至: ${imageUrl}`,
+            marketing: "测试营销信息",
+            market_potential: "测试市场潜力",
+            target_audience: "测试目标用户"
           }
-          throw new Error(error.error || "Failed to analyze image");
-        }
-
-        const ideasResult = await ideasResponse.json();
-        setIdeas(ideasResult.ideas);
+        ]);
+        setCameraState("results");
 
       } catch (error) {
         if (error instanceof Error) {
