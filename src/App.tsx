@@ -65,6 +65,7 @@ function App() {
         }
         formData.append("source", base64Data);
         formData.append("expiration", "PT5M");
+        formData.append("format", "txt");  
 
         const response = await fetch(`https://www.picgo.net/api/1/upload`, {
           method: "POST",
@@ -79,14 +80,8 @@ function App() {
           throw new Error(error.message || "Image upload failed");
         }
 
-        const result = await response.json();
-        const imageUrl = result?.image?.url || result?.image?.display_url; 
-        if (!imageUrl) {
-          throw new Error("Invalid image URL in response");
-        }
+        const imageUrl = await response.text(); 
         
-        //const testUserId = "user_2MZ45q577671Xx24rYt4";
-        //const testImageUrl = "https://img.picgo.net/2025/03/25/e4d6cbefb4544e87b2deb9d13383a5d12d291bc66b93b696.jpg";
         const ideasResponse = await fetch('https://expressstartscan.vercel.app/analyze-image', {
           method: 'POST',
           headers: {
