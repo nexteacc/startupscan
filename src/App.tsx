@@ -121,7 +121,7 @@ throw new Error("Daily request limit reached, please try again tomorrow");
         setIdeas([
           {
             source: "Discovering",
-            strategy: "Collecting more inspiration...",
+            strategy: "为什么出错",
             marketing: "Try again later",
             market_potential: "Unknown",
             target_audience: "Unknown",
