@@ -124,7 +124,7 @@ function App() {
 
         setIdeas([
           {
-            source: "Discovering",
+            source: "你大爺",
             strategy: "为什么出错",
             marketing: "Try again later",
             market_potential: "Unknown",
