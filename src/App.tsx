@@ -16,9 +16,7 @@ interface Idea {
 
 function App() {
   const { signOut, user } = useClerk();
-  const [cameraState, setCameraState] = useState<
-    "idle" | "active" | "error" | "results"
-  >("idle");
+  const [cameraState, setCameraState] = useState<"idle" | "active" | "results">("idle");
 
   const [ideas, setIdeas] = useState<Idea[]>([]);
 
@@ -114,17 +112,10 @@ function App() {
         setCameraState("results");
 
       } catch (error) {
-        if (error instanceof Error) {
-          console.error("Error:", error);
-          setErrorMessage(error.message);
-        } else {
-          console.error("Unknown error:", error);
-          setErrorMessage("An unknown error occurred");
-        }
 
         setIdeas([
           {
-            source: "你大爺",
+            source: "你大爺2",
             strategy: "为什么出错",
             marketing: "Try again later",
             market_potential: "Unknown",
@@ -144,28 +135,39 @@ function App() {
     <>
       <SignedIn>
         {cameraState === "active" ? (
-          <CameraView onExit={handleExit} onCapture={handleCapture} />
+          <CameraView 
+            onExit={handleExit} 
+            onCapture={handleCapture} 
+            isLoading={isLoading}  // 添加加载状态
+          />
         ) : cameraState === "results" ? (
           <ResultsView
             ideas={ideas}
-            onRetake={() => setCameraState("active")}
+            onRetake={() => {
+              setIdeas([]); // 清空之前的结果
+              setCameraState("active");
+            }}
+            onBack={() => {
+              setIdeas([]); // 清空之前的结果
+              setCameraState("idle");
+            }}
           />
         ) : (
           <div className="relative w-full h-full">
             <AuroraBackground>
               <div className="relative w-full h-full flex flex-col items-center justify-center">
-                {cameraState === "error" && (
+                {errorMessage && (
                   <div className="text-red-500 mb-4">{errorMessage}</div>
                 )}
                 {isLoading && <div className="mb-4">Collecting inspiration, please wait...</div>}
-                {!isLoading && cameraState === "idle" && (
+                {!isLoading && (
                   <CameraButton
                     onCameraStart={(stream) => {
                       setMediaStream(stream);
+                      setErrorMessage("");
                       setCameraState("active");
                     }}
                     onError={(msg) => {
-                      setCameraState("error");
                       setErrorMessage(msg);
                     }}
                   />
