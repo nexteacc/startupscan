@@ -115,7 +115,7 @@ function App() {
 
         setIdeas([
           {
-            source: "你大爺2",
+            source: "你大爺3",
             strategy: "为什么出错",
             marketing: "Try again later",
             market_potential: "Unknown",
@@ -138,7 +138,7 @@ function App() {
           <CameraView 
             onExit={handleExit} 
             onCapture={handleCapture} 
-            
+            isLoading={isLoading}  // 添加加载状态
           />
         ) : cameraState === "results" ? (
           <ResultsView
@@ -146,6 +146,10 @@ function App() {
             onRetake={() => {
               setIdeas([]); // 清空之前的结果
               setCameraState("active");
+            }}
+            onBack={() => {
+              setIdeas([]); // 清空之前的结果
+              setCameraState("idle");
             }}
           />
         ) : (

@@ -11,9 +11,10 @@ interface Idea {
 interface ResultsViewProps {
   ideas: Idea[];
   onRetake: () => void;
+  onBack?: () => void; // 添加这行
 }
 
-const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
+const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) => {
   return (
     <div className="p-4 space-y-4">
       <h1 className="text-xl font-bold text-center mb-4">✨ Startup Inspiration ✨</h1>
@@ -28,12 +29,20 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
         </div>
       ))}
 
-      <button
-        onClick={onRetake}
-        className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
-      >
-        Generate Again
-      </button>
+      <div className="flex gap-4">
+        <button
+          onClick={onBack}
+          className="mt-4 w-full bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
+        >
+          返回首页
+        </button>
+        <button
+          onClick={onRetake}
+          className="mt-4 w-full bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded"
+        >
+          重新拍摄
+        </button>
+      </div>
     </div>
   );
 };
