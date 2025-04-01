@@ -138,7 +138,7 @@ function App() {
           <CameraView 
             onExit={handleExit} 
             onCapture={handleCapture} 
-            isLoading={isLoading}  // 添加加载状态
+            
           />
         ) : cameraState === "results" ? (
           <ResultsView
@@ -146,10 +146,6 @@ function App() {
             onRetake={() => {
               setIdeas([]); // 清空之前的结果
               setCameraState("active");
-            }}
-            onBack={() => {
-              setIdeas([]); // 清空之前的结果
-              setCameraState("idle");
             }}
           />
         ) : (
