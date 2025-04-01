@@ -88,12 +88,13 @@ if (responseJson.status !== "ok") {
   throw new Error("Image upload failed");
 }
 
-const imageUrl = responseJson.data.downloadPage; // 获取下载链接
+const directImageUrl = responseJson.data.directLink;
+console.log("Direct Image URL:", directImageUrl);
         
         setIdeas([
           {
             source: "测试模式",
-            strategy: `API响应: ${imageUrl}`,
+            strategy: `API响应: ${directImageUrl}`,
             marketing: "测试营销信息",
             market_potential: "测试市场潜力",
             target_audience: "测试目标用户"
