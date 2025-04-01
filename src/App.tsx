@@ -75,10 +75,10 @@ function App() {
           body: formData,
         });
 
-        if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.message || "Image upload failed");
-        }
+        // if (!response.ok) {
+        //   const error = await response.json();
+        //   throw new Error(error.message || "Image upload failed");
+        // }
 
         //const imageUrl = await response.text(); 
         
@@ -100,6 +100,7 @@ function App() {
 
         // const ideasResult = await ideasResponse.json();
         //setIdeas(ideasResult.ideas);
+        
         setIdeas([
           {
             source: "测试模式",
