@@ -10,11 +10,26 @@ export const StyledWrapper = styled.div`
 
   .main {
     position: relative;
-    display: flex; /* Use flex for centering */
+    display: flex;
     justify-content: center;
     align-items: center;
-    width: 18em; /* Adjust size as needed */
-    height: 18em; /* Adjust size as needed */
+    width: 28em;  // 增大容器宽度
+    height: 28em; // 增大容器高度
+    margin: 0 auto; // 确保居中
+  }
+
+  .hint-card, .card {
+    width: 120px;  // 增大卡片尺寸
+    height: 120px;
+    font-size: 16px; // 增大字体
+  }
+
+  // 调整卡片展开位置
+  .main:hover .card:nth-child(1) { transform: scale(1.2) translate(0, 0); }
+  .main:hover .card:nth-child(2) { transform: scale(1.2) translate(0, -130%); }
+  .main:hover .card:nth-child(3) { transform: scale(1.2) translate(-130%, 0); }
+  .main:hover .card:nth-child(4) { transform: scale(1.2) translate(130%, 0); }
+  .main:hover .card:nth-child(5) { transform: scale(1.2) translate(0, 130%); }
     transition: all 0.4s ease-in-out;
     margin-bottom: 20px; /* Add space below the interactive area */
   }

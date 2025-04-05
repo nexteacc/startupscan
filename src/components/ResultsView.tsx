@@ -28,9 +28,12 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
     setIsDetailVisible(true); // Trigger detail view appearance
   };
 
+
+  const ANIMATION_DURATION = 350; // Duration in milliseconds
+  
   const handleCloseDetail = () => {
-    setIsDetailVisible(false); 
-    setTimeout(() => setSelectedIdeaIndex(null), 300); // Match animation duration approx
+    setIsDetailVisible(false);
+    setTimeout(() => setSelectedIdeaIndex(null), ANIMATION_DURATION);
   };
 
 
@@ -74,16 +77,13 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
         {displayIdeas.map((idea, index) => (
           <div
             key={index}
-            // Add CSS class for nth-child targeting from styles if needed,
-            // though positioning is handled directly in styles based on order.
             className={`card`}
             onClick={() => handleCardClick(index)}
-            role="button" // Improve accessibility
-            tabIndex={0} // Make it focusable
-             onKeyDown={(e) => e.key === 'Enter' && handleCardClick(index)} // Allow activation with Enter key
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => e.key === 'Enter' && handleCardClick(index)}
           >
-            {/* Display source or a short title */}
-            {idea.source || `Idea ${index + 1}`}
+            💡 
           </div>
         ))}
       </div>
