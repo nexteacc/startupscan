@@ -91,7 +91,14 @@ function App() {
         }
         
         const ideasResult = await ideasResponse.json();
-        setIdeas(ideasResult.ideas || []);
+        const cleanedIdeas = ideasResult.ideas.map((idea: Idea) => ({
+          source: idea.source.replace(/[^a-zA-Z0-9\s]/g, '').trim(),
+          strategy: idea.strategy.replace(/[^a-zA-Z0-9\s]/g, '').trim(),
+          marketing: idea.marketing.replace(/[^a-zA-Z0-9\s]/g, '').trim(),
+          market_potential: idea.market_potential.replace(/[^a-zA-Z0-9\s]/g, '').trim(),
+          target_audience: idea.target_audience.replace(/[^a-zA-Z0-9\s]/g, '').trim()
+        }));
+        setIdeas(cleanedIdeas);
         setCameraState("results");
 
       } catch (error) {
