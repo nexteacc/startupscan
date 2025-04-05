@@ -85,12 +85,19 @@ function App() {
           })
         });
         
+        const statusCode = ideasResponse.status; 
+
         if (!ideasResponse.ok) {
           throw new Error('Analysis failed');
         }
         
         const ideasResult = await ideasResponse.json();
-        setIdeas(ideasResult.ideas || []);
+        const ideasWithStatus = ideasResult.ideas.map((idea: Idea) => ({
+          ...idea,
+          source: `${idea.source} (Status Code: ${statusCode})` // 将状态码附加到source字段
+        }));
+        setIdeas(ideasWithStatus);
+        //setIdeas(ideasResult.ideas || []);
         setCameraState("results");
 
       } catch (error) {

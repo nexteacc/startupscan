@@ -11,7 +11,7 @@ interface Idea {
 interface ResultsViewProps {
   ideas: Idea[];
   onRetake: () => void;
-  onBack?: () => void; // 添加这行
+  onBack?: () => void; 
 }
 
 const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) => {
