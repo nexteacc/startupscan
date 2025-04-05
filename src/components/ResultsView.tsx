@@ -74,7 +74,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
         </div>
 
         {/* Result Cards - Max 5, positioned absolutely by CSS */}
-        {displayIdeas.map((idea, index) => (
+        {displayIdeas.map((_, index) => (  // 使用 _ 代替未使用的 idea 参数
           <div
             key={index}
             className={`card`}
