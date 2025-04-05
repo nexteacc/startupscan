@@ -80,7 +80,7 @@ function App() {
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            userId: user?.id,
+            userId: user?.id || "defaultUserId", 
             image_url: imageUrl
           })
         });
