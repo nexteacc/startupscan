@@ -257,4 +257,48 @@ export const StyledWrapper = styled.div`
    .action-button.secondary:hover {
      background-color: #4b5563; /* Darker gray */
    }
+
+  .main {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+  }
+
+  /* 新增旋转容器 */
+  .rotating-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    animation: rotate 12s linear infinite;
+    transform-origin: 50% 50%;
+  }
+
+  /* 中心卡片定位居中 */
+  .center-card {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2;
+  }
+
+  /* 其他四个外围卡片预先定位在圆上 */
+  .outer-card:nth-child(2) {  /* index=1，ideas[1] */
+    position: absolute; top: 0%; left: 50%; transform: translate(-50%, 0);
+  }
+  .outer-card:nth-child(3) {
+    position: absolute; top: 50%; left: 100%; transform: translate(-100%, -50%);
+  }
+  .outer-card:nth-child(4) {
+    position: absolute; top: 100%; left: 50%; transform: translate(-50%, -100%);
+  }
+  .outer-card:nth-child(5) {
+    position: absolute; top:50%; left:0%; transform: translate(0%, -50%);
+  }
+
+  @keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
 `;

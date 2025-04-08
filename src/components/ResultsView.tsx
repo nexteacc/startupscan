@@ -77,7 +77,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
         {displayIdeas.map((_, index) => (  
           <div
             key={index}
-            className={`card`}
+            className={`card ${index === 0 ? "center-card" : "outer-card"}`}
             onClick={() => handleCardClick(index)}
             role="button"
             tabIndex={0}
