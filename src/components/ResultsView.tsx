@@ -63,17 +63,17 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
 
   return (
     <StyledWrapper>
-       <h1 className="text-xl font-bold text-center mb-6">✨ Startup Inspiration ✨</h1>
+       <h1 className="text-xl font-bold text-center mb-6">✨ Next BIG TOY ✨</h1>
 
-       {/* Container for the interactive cards and hint */}
+       
       <div className="main">
-        {/* Hint Card - Positioned absolutely by CSS */}
+    
         <div className="hint-card">
           <span>💡</span>
           Hover to see Ideas
         </div>
 
-        {/* Result Cards - Max 5, positioned absolutely by CSS */}
+        
         {displayIdeas.map((_, index) => (  
           <div
             key={index}
@@ -83,7 +83,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
             tabIndex={0}
             onKeyDown={(e) => e.key === 'Enter' && handleCardClick(index)}
           >
-            💡 
+            💡
           </div>
         ))}
       </div>
@@ -91,13 +91,13 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
 
       {selectedIdeaIndex !== null && (
          <>
-          {/* Backdrop fades in/out based on isDetailVisible */}
+         
            <div
               className={`detail-backdrop ${isDetailVisible ? 'visible' : ''}`}
               onClick={handleCloseDetail}
               style={{ animation: isDetailVisible ? 'fadeIn 0.3s ease-out forwards' : 'fadeOut 0.3s ease-in forwards' }}
             />
-            {/* Detail view animates based on isDetailVisible */}
+          
            <div
              className={`detail-view ${isDetailVisible ? 'visible' : ''}`}
              role="dialog"
@@ -121,7 +121,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
          </>
        )}
 
-      {/* Action Buttons - Rendered only when detail view is not shown */}
+      
       {selectedIdeaIndex === null && (
         <div className="action-buttons">
           <button className="action-button" onClick={onRetake}>
