@@ -69,7 +69,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
       <div className="main">
     
         <div className="rotating-wrapper">
-          {/* 把所有卡片放进这个容器 */}
+          {/* 把所有卡片放进这个容器 - 这是正确的 */}
           {displayIdeas.map((_, index) => (  
             <div
               key={index}
@@ -89,19 +89,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
           Hover to see Ideas
         </div>
 
-        
-        {displayIdeas.map((_, index) => (  
-          <div
-            key={index}
-            className={`card ${index === 0 ? "center-card" : "outer-card"}`}
-            onClick={() => handleCardClick(index)}
-            role="button"
-            tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && handleCardClick(index)}
-          >
-            💡
-          </div>
-        ))}
+
+
+
       </div>
 
 
