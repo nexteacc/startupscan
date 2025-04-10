@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { StyledWrapper } from "./ResultsView.styles"; // Import styled wrapper
+import React, { useState } from "react";
 
-// Keep Idea interface definition
 interface Idea {
   source: string;
   strategy: string;
@@ -16,131 +14,100 @@ interface ResultsViewProps {
   onBack?: () => void;
 }
 
-// --- ResultsView Component ---
 const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) => {
   const [selectedIdeaIndex, setSelectedIdeaIndex] = useState<number | null>(null);
-  const [isDetailVisible, setIsDetailVisible] = useState(false); // Control visibility for animation
-
-  const handleCardClick = (index: number) => {
-    // Prevent clicking if detail view is already visible or animating out
-    if (isDetailVisible && selectedIdeaIndex !== null) return;
-    setSelectedIdeaIndex(index);
-    setIsDetailVisible(true); // Trigger detail view appearance
-  };
-
-
-  const ANIMATION_DURATION = 350; // Duration in milliseconds
-  
-  const handleCloseDetail = () => {
-    setIsDetailVisible(false);
-    setTimeout(() => setSelectedIdeaIndex(null), ANIMATION_DURATION);
-  };
-
-
-  // Close detail view if Escape key is pressed
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape' && isDetailVisible) {
-        handleCloseDetail();
-      }
-    };
-
-    // Add listener only when detail view is visible
-    if (isDetailVisible) {
-      window.addEventListener('keydown', handleKeyDown);
-    }
-
-    // Cleanup listener on component unmount or when detail view is closed
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isDetailVisible]); // Dependency array includes isDetailVisible
-
-  const selectedIdea = selectedIdeaIndex !== null ? ideas[selectedIdeaIndex] : null;
-
-  // Ensure we only try to render cards if ideas exist
-  const displayIdeas = ideas.slice(0, 5); // Still limit to 5 cards
+  const displayIdeas = ideas.slice(0, 5); // 仍然限制为5张卡片
 
   return (
-    <StyledWrapper>
-       <h1 className="text-xl font-bold text-center mb-6">✨ Next BIG TOY ✨</h1>
+    <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
+      <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>✨ Next BIG TOY ✨</h1>
 
-       
-      <div className="main">
-    
-        <div className="rotating-wrapper">
-          {/* 把所有卡片放进这个容器 - 这是正确的 */}
-          {displayIdeas.map((_, index) => (  
-            <div
-              key={index}
-              className={`card ${index === 0 ? "center-card" : "outer-card"}`}
-              onClick={() => handleCardClick(index)}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => e.key === 'Enter' && handleCardClick(index)}
-            >
-              💡
-            </div>
-          ))}
-        </div>
-    
-        <div className="hint-card">
-          <span>💡</span>
-          Hover to see Ideas
-        </div>
-
-
-
-
+      {/* 简化的垂直卡片布局 */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        {displayIdeas.map((idea, index) => (
+          <div 
+            key={index}
+            style={{
+              padding: '15px',
+              border: '1px solid #ddd',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+            onClick={() => setSelectedIdeaIndex(index)}
+          >
+            <h3>Idea {index + 1}</h3>
+            <p>Source: {idea.source}</p>
+          </div>
+        ))}
       </div>
 
-
+      {/* 简化后的详情视图 */}
       {selectedIdeaIndex !== null && (
-         <>
-         
-           <div
-              className={`detail-backdrop ${isDetailVisible ? 'visible' : ''}`}
-              onClick={handleCloseDetail}
-              style={{ animation: isDetailVisible ? 'fadeIn 0.3s ease-out forwards' : 'fadeOut 0.3s ease-in forwards' }}
-            />
-          
-           <div
-             className={`detail-view ${isDetailVisible ? 'visible' : ''}`}
-             role="dialog"
-             aria-modal="true"
-             aria-labelledby="detail-title"
-             style={{ animation: isDetailVisible ? 'fadeInScale 0.35s cubic-bezier(0.165, 0.84, 0.44, 1) forwards' : 'fadeOutScale 0.3s cubic-bezier(0.55, 0.085, 0.68, 0.53) forwards' }}
-             >
-              <button
-                 className="detail-close-button"
-                 onClick={handleCloseDetail}
-                 aria-label="Close detail view"
-              >
-                ×
-              </button>
-             <h2 id="detail-title">📍 Source: {selectedIdea?.source}</h2>
-             <p><strong>Strategy:</strong> {selectedIdea?.strategy}</p>
-             <p><strong>Marketing:</strong> {selectedIdea?.marketing}</p>
-             <p><strong>Market Potential:</strong> {selectedIdea?.market_potential}</p>
-             <p><strong>Target Audience:</strong> {selectedIdea?.target_audience}</p>
-           </div>
-         </>
-       )}
-
-      
-      {selectedIdeaIndex === null && (
-        <div className="action-buttons">
-          <button className="action-button" onClick={onRetake}>
-            📸 Retake
+        <div style={{
+          position: 'fixed',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          background: 'white',
+          padding: '20px',
+          borderRadius: '8px',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
+          zIndex: 100
+        }}>
+          <button 
+            style={{
+              position: 'absolute',
+              top: '10px',
+              right: '10px',
+              background: 'none',
+              border: 'none',
+              fontSize: '20px',
+              cursor: 'pointer'
+            }}
+            onClick={() => setSelectedIdeaIndex(null)}
+          >
+            ×
           </button>
-          {onBack && (
-             <button className="action-button secondary" onClick={onBack}>
-               ⬅️ Back
-             </button>
-          )}
+          <h2>📍 Source: {ideas[selectedIdeaIndex].source}</h2>
+          <p><strong>Strategy:</strong> {ideas[selectedIdeaIndex].strategy}</p>
+          <p><strong>Marketing:</strong> {ideas[selectedIdeaIndex].marketing}</p>
+          <p><strong>Market Potential:</strong> {ideas[selectedIdeaIndex].market_potential}</p>
+          <p><strong>Target Audience:</strong> {ideas[selectedIdeaIndex].target_audience}</p>
         </div>
       )}
-    </StyledWrapper>
+
+      {/* 操作按钮 */}
+      <div style={{ display: 'flex', justifyContent: 'center', gap: '20px', marginTop: '20px' }}>
+        <button 
+          style={{
+            padding: '10px 20px',
+            background: '#4f46e5',
+            color: 'white',
+            border: 'none',
+            borderRadius: '8px',
+            cursor: 'pointer'
+          }}
+          onClick={onRetake}
+        >
+          📸 Retake
+        </button>
+        {onBack && (
+          <button 
+            style={{
+              padding: '10px 20px',
+              background: '#6b7280',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer'
+            }}
+            onClick={onBack}
+          >
+            ⬅️ Back
+          </button>
+        )}
+      </div>
+    </div>
   );
 };
 
