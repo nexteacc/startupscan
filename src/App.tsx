@@ -23,6 +23,7 @@ function App() {
   const [errorMessage, setErrorMessage] = useState("");
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [lastImageUrl, setLastImageUrl] = useState<string | null>(null);
 
   const handleExit = useCallback(() => {
     setCameraState("idle");
@@ -39,7 +40,13 @@ function App() {
       try {
         setIsLoading(true);
         setErrorMessage("");
-
+        
+        // 关闭媒体流
+        if (mediaStream) {
+          mediaStream.getTracks().forEach((track) => track.stop());
+          setMediaStream(null);
+        }
+        
         if (!image || image.length < 100) {
           throw new Error("Invalid image data");
         }
@@ -72,7 +79,7 @@ function App() {
 
 
         const imageUrl = responseJson.secure_url;
-
+        setLastImageUrl(imageUrl);
         
         const ideasResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze-image`, {
           method: 'POST',
@@ -108,7 +115,7 @@ function App() {
         setIsLoading(false);
       }
     },
-    [user]
+    [user, mediaStream] 
   );
 
   return (
@@ -118,17 +125,50 @@ function App() {
           <CameraView 
             onExit={handleExit} 
             onCapture={handleCapture} 
-            isLoading={isLoading}  // 添加加载状态
+            isLoading={isLoading}  
           />
         ) : cameraState === "results" ? (
           <ResultsView
             ideas={ideas}
-            onRetake={() => {
-              setIdeas([]); // 清空之前的结果
-              setCameraState("active");
+            errorMessage={errorMessage}
+            onRetry={() => {
+              if (lastImageUrl) {
+                setIsLoading(true);
+                setErrorMessage("");
+                fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze-image`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify({
+                    userId: user?.id || "defaultUserId",
+                    image_url: lastImageUrl
+                  })
+                })
+                .then(response => {
+                  if (!response.ok) throw new Error('Analysis failed');
+                  return response.json();
+                })
+                .then(ideasResult => {
+                  const cleanedIdeas = ideasResult.ideas.map((idea: Idea) => ({
+                    source: idea.source.trim(),
+                    strategy: idea.strategy.trim(),
+                    marketing: idea.marketing.trim(),
+                    market_potential: idea.market_potential.trim(),
+                    target_audience: idea.target_audience.trim()
+                  }));
+                  setIdeas(cleanedIdeas);
+                })
+                .catch(error => {
+                  setErrorMessage(error instanceof Error ? error.message : "Unknown error");
+                })
+                .finally(() => {
+                  setIsLoading(false);
+                });
+              }
             }}
             onBack={() => {
-              setIdeas([]); // 清空之前的结果
+              setIdeas([]); 
               setCameraState("idle");
             }}
           />
