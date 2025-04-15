@@ -8,13 +8,12 @@ interface Idea {
   target_audience: string;
 }
 
-// 在ResultsView组件中添加错误状态和重试按钮
 interface ResultsViewProps {
   ideas: Idea[];
   onRetake: () => void;
   onBack?: () => void;
-  errorMessage?: string;  // 添加错误信息属性
-  onRetry?: () => void;   // 添加重试回调
+  errorMessage?: string;  
+  onRetry?: () => void;   
 }
 
 const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) => {
@@ -23,11 +22,11 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
 
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      {/* 新增：空数据提示 */}
+  
       {ideas.length === 0 && (
         <div style={{color: 'red', marginBottom: 20}}>没有收到数据</div>
       )}
-      {/* 原有展示逻辑 */}
+   
       <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>✨ Next BIG TOY ✨</h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {displayIdeas.map((idea, index) => (
