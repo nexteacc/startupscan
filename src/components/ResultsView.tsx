@@ -22,11 +22,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-  
-      {ideas.length === 0 && (
-        <div style={{color: 'red', marginBottom: 20}}>没有收到数据</div>
-      )}
-   
+
       <h1 style={{ textAlign: 'center', marginBottom: '20px' }}>✨ Next BIG TOY ✨</h1>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
         {displayIdeas.map((idea, index) => (
@@ -36,12 +32,31 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
               padding: '15px',
               border: '1px solid #ddd',
               borderRadius: '8px',
-              cursor: 'pointer'
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
             }}
             onClick={() => setSelectedIdeaIndex(index)}
           >
-            <h3>Idea {index + 1}</h3>
-            <p>Source: {idea.source}</p>
+            <div>
+              <h3>Idea {index + 1}</h3>
+              <p>Source: {idea.source}</p>
+            </div>
+            <button
+              className="learn-more"
+              tabIndex={-1}
+              onClick={e => {
+                e.stopPropagation();
+                setSelectedIdeaIndex(index);
+              }}
+              style={{ marginLeft: '16px' }}
+            >
+              <span className="circle" aria-hidden="true">
+                <span className="icon arrow"></span>
+              </span>
+              <span className="button-text">Learn More</span>
+            </button>
           </div>
         ))}
       </div>
@@ -56,10 +71,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
           height: '100vh',
           background: 'rgba(255,255,255,0.98)',
           padding: '32px 12px 16px 12px',
-          borderRadius: '0',  // 移动端全屏弹窗通常不需要圆角
+          borderRadius: '0', 
           boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
           zIndex: 100,
-          overflowY: 'auto', // 适配内容超出
+          overflowY: 'auto', 
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'flex-start',
@@ -81,7 +96,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
           >
             ×
           </button>
-          <h2 style={{marginTop: '32px', fontSize: '22px'}}>📍 Source: {ideas[selectedIdeaIndex].source}</h2>
+          <p style={{marginTop: '32px', fontSize: '22px'}}>📍 Source: {ideas[selectedIdeaIndex].source}</p>
           <p style={{margin: '16px 0', fontSize: '18px'}}><strong>Strategy:</strong> {ideas[selectedIdeaIndex].strategy}</p>
           <p style={{margin: '10px 0'}}><strong>Marketing:</strong> {ideas[selectedIdeaIndex].marketing}</p>
           <p style={{margin: '10px 0'}}><strong>Market Potential:</strong> {ideas[selectedIdeaIndex].market_potential}</p>

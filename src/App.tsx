@@ -41,7 +41,7 @@ function App() {
         setIsLoading(true);
         setErrorMessage("");
         
-        // 关闭媒体流
+        
         if (mediaStream) {
           mediaStream.getTracks().forEach((track) => track.stop());
           setMediaStream(null);
