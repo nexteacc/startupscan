@@ -81,23 +81,23 @@ function App() {
         const imageUrl = responseJson.secure_url;
         setLastImageUrl(imageUrl);
         
-        // const ideasResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze-image`, {
-        //   method: 'POST',
-        //   headers: {
-        //     'Content-Type': 'application/json'
-        //   },
-        //   body: JSON.stringify({
-        //     userId: user?.id || "defaultUserId", 
-        //     image_url: imageUrl
-        //   })
-        // });
+        const ideasResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze-image`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            userId: user?.id || "defaultUserId", 
+            image_url: imageUrl
+          })
+        });
 
-        // const statusCode = ideasResponse.status;
+        const statusCode = ideasResponse.status;
       
         setIdeas([
           {
             source: "Cloudinary上传",
-            strategy: `图片URL: ${imageUrl}`,
+            strategy: `图片URL: ${imageUrl} statusCode: ${statusCode}`,
             marketing: "测试营销信息",
             market_potential: "测试市场潜力",
             target_audience: "测试目标用户"
@@ -172,7 +172,7 @@ function App() {
             onRetake={() => {
               setIdeas([]);
               setErrorMessage("");
-              setCameraState("active"); // 重新进入拍摄状态
+              setCameraState("active"); 
             }}
           />
         ) : (
