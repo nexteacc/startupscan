@@ -73,8 +73,30 @@ button {
 }
 
 button.learn-more {
-  width: 12rem;
-  height: auto;
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  min-width: unset !important;
+  min-height: unset !important;
+  padding: 0 !important;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.learn-more .circle {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  min-width: unset !important;
+  min-height: unset !important;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+button.learn-more .button-text {
+  display: none !important;
 }
 
 button.learn-more .circle {
@@ -144,4 +166,16 @@ button:hover .circle .icon.arrow {
 
 button:hover .button-text {
   color: #fff;
+}
+
+.idea-card {
+  transition: background 0.18s, transform 0.12s;
+  /* 保证点击区域有圆角和边框 */
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fff;
+}
+.idea-card:active {
+  background: #e6edff;
+  transform: scale(0.97);
 }

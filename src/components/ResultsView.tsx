@@ -28,10 +28,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
         {displayIdeas.map((idea, index) => (
           <div 
             key={index}
+            className="idea-card"
             style={{
               padding: '15px',
-              border: '1px solid #ddd',
-              borderRadius: '8px',
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
@@ -55,7 +54,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
               <span className="circle" aria-hidden="true">
                 <span className="icon arrow"></span>
               </span>
-              <span className="button-text">Learn More</span>
+              <span className="button-text"></span>
             </button>
           </div>
         ))}
@@ -109,7 +108,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
         <button 
           style={{
             padding: '10px 20px',
-            background: '#4f46e5',
+            background: 'royalblue', 
             color: 'white',
             border: 'none',
             borderRadius: '8px',
