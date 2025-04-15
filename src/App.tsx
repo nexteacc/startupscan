@@ -169,6 +169,11 @@ function App() {
               setIdeas([]); 
               setCameraState("idle");
             }}
+            onRetake={() => {
+              setIdeas([]);
+              setErrorMessage("");
+              setCameraState("active"); // 重新进入拍摄状态
+            }}
           />
         ) : (
           <div className="relative w-full h-full">
