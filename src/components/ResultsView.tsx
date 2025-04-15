@@ -50,34 +50,42 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
       {selectedIdeaIndex !== null && (
         <div style={{
           position: 'fixed',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          background: 'white',
-          padding: '20px',
-          borderRadius: '8px',
+          top: 0,
+          left: 0,
+          width: '100vw',
+          height: '100vh',
+          background: 'rgba(255,255,255,0.98)',
+          padding: '32px 12px 16px 12px',
+          borderRadius: '0',  // 移动端全屏弹窗通常不需要圆角
           boxShadow: '0 2px 10px rgba(0,0,0,0.1)',
-          zIndex: 100
+          zIndex: 100,
+          overflowY: 'auto', // 适配内容超出
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-start',
+          alignItems: 'flex-start'
         }}>
           <button 
             style={{
               position: 'absolute',
-              top: '10px',
-              right: '10px',
+              top: '12px',
+              right: '16px',
               background: 'none',
               border: 'none',
-              fontSize: '20px',
-              cursor: 'pointer'
+              fontSize: '26px',
+              cursor: 'pointer',
+              color: '#222'
             }}
             onClick={() => setSelectedIdeaIndex(null)}
+            aria-label="关闭弹窗"
           >
             ×
           </button>
-          <h2>📍 Source: {ideas[selectedIdeaIndex].source}</h2>
-          <p><strong>Strategy:</strong> {ideas[selectedIdeaIndex].strategy}</p>
-          <p><strong>Marketing:</strong> {ideas[selectedIdeaIndex].marketing}</p>
-          <p><strong>Market Potential:</strong> {ideas[selectedIdeaIndex].market_potential}</p>
-          <p><strong>Target Audience:</strong> {ideas[selectedIdeaIndex].target_audience}</p>
+          <h2 style={{marginTop: '32px', fontSize: '22px'}}>📍 Source: {ideas[selectedIdeaIndex].source}</h2>
+          <p style={{margin: '16px 0', fontSize: '18px'}}><strong>Strategy:</strong> {ideas[selectedIdeaIndex].strategy}</p>
+          <p style={{margin: '10px 0'}}><strong>Marketing:</strong> {ideas[selectedIdeaIndex].marketing}</p>
+          <p style={{margin: '10px 0'}}><strong>Market Potential:</strong> {ideas[selectedIdeaIndex].market_potential}</p>
+          <p style={{margin: '10px 0'}}><strong>Target Audience:</strong> {ideas[selectedIdeaIndex].target_audience}</p>
         </div>
       )}
 
@@ -96,21 +104,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) =>
         >
           📸 Retake
         </button>
-        {onBack && (
-          <button 
-            style={{
-              padding: '10px 20px',
-              background: '#6b7280',
-              color: 'white',
-              border: 'none',
-              borderRadius: '8px',
-              cursor: 'pointer'
-            }}
-            onClick={onBack}
-          >
-            ⬅️ Back
-          </button>
-        )}
+
       </div>
     </div>
   );
