@@ -92,17 +92,21 @@ function App() {
           })
         });
 
-        const statusCode = ideasResponse.status;
-      
-        setIdeas([
-          {
-            source: "Cloudinary上传",
-            strategy: `图片URL: ${imageUrl} statusCode: ${statusCode}`,
-            marketing: "测试营销信息",
-            market_potential: "测试市场潜力",
-            target_audience: "测试目标用户"
-          }
-        ]);
+        if (ideasResponse.status === 200) {
+          const data = await ideasResponse.json();
+          setIdeas(
+            data.ideas.map((idea: Idea) => ({
+              source: idea.source.trim(),
+              strategy: idea.strategy.trim(),
+              marketing: idea.marketing.trim(),
+              market_potential: idea.market_potential.trim(),
+              target_audience: idea.target_audience.trim()
+            }))
+          );
+        } else {
+          
+          setErrorMessage(' Analysis failed');
+        }
         
         setCameraState("results");
 
