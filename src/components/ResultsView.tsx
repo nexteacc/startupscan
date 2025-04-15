@@ -16,7 +16,7 @@ interface ResultsViewProps {
   onRetry?: () => void;   
 }
 
-const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake, onBack }) => {
+const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
   const [selectedIdeaIndex, setSelectedIdeaIndex] = useState<number | null>(null);
   const displayIdeas = ideas.slice(0, 5); 
 
