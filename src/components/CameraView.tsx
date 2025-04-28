@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from "react";
 interface CameraViewProps {
   onExit: () => void;
   onCapture: (image: string) => Promise<void>;
-  isLoading?: boolean; // 添加这行
+  isLoading?: boolean; 
 }
 
 export const CameraView = ({ onExit, onCapture, isLoading }: CameraViewProps) => {
