@@ -155,7 +155,7 @@ button.learn-more .button-text {
   text-transform: uppercase;
 }
 
-button:hover .circle {
+/* button:hover .circle {
   width: 100%;
 }
 
@@ -166,7 +166,7 @@ button:hover .circle .icon.arrow {
 
 button:hover .button-text {
   color: #fff;
-}
+} */
 
 .idea-card {
   transition: background 0.18s, transform 0.12s;

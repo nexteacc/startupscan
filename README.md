@@ -21,6 +21,7 @@
 
 - API基础URL通过环境变量 VITE_API_BASE_URL 配置
 - 图片分析端点： /analyze-image （POST请求）
+
 开发工具 ：
 
 - ESLint 9.16.0
