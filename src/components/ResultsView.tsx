@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import * as React from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface Idea {
@@ -17,7 +18,7 @@ interface ResultsViewProps {
   onRetry?: () => void;   
 }
 
-const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
+const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsViewProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [showDetails, setShowDetails] = useState(false);
   const displayIdeas = ideas.slice(0, 5);
@@ -37,7 +38,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
     }
   };
 
-  const handleDragEnd = (event: any, info: any) => {
+  const handleDragEnd = (_: unknown, info: any) => {
     const threshold = 100;
     if (info.offset.x > threshold) {
       prevIdea();
@@ -52,7 +53,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }) => {
       <div className="text-center py-6">
         <h1 className="text-3xl font-bold text-gray-800 mb-2">✨ Next BIG TOY ✨</h1>
         <div className="flex justify-center items-center space-x-2">
-          {displayIdeas.map((_, index) => (
+          {displayIdeas.map((_: Idea, index: number) => (
             <div
               key={index}
               className={`w-2 h-2 rounded-full transition-all duration-300 ${
