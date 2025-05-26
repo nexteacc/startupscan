@@ -74,6 +74,8 @@ export const CameraView = ({ onExit, onCapture, isLoading }: CameraViewProps) =>
             autoPlay
             playsInline
             muted
+            controls={false}
+            webkit-playsinline="true"
             onLoadedMetadata={() => {
               if (videoRef.current) videoRef.current.play();
             }}

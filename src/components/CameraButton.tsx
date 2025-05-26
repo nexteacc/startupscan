@@ -6,14 +6,35 @@ interface CameraButtonProps {
 export const CameraButton = ({ onCameraStart, onError }: CameraButtonProps) => {
   const startCamera = async () => {
     try {
+      // Check if mediaDevices is supported
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error("Camera API not supported in this browser");
+      }
+
+      // Request camera permission with enhanced constraints
       const stream = await navigator.mediaDevices.getUserMedia({
         video: {
-          facingMode: "environment", 
+          facingMode: "environment",
+          width: { ideal: 1920, max: 1920 },
+          height: { ideal: 1080, max: 1080 }
         },
       });
       onCameraStart(stream);
     } catch (error) {
-      onError("Cannot access camera. Please make sure camera permission is granted");
+      console.error("Camera access error:", error);
+      if (error instanceof Error) {
+        if (error.name === "NotAllowedError") {
+          onError("摄像头权限被拒绝。请在浏览器设置中允许摄像头访问权限。");
+        } else if (error.name === "NotFoundError") {
+          onError("未找到摄像头设备。请确保设备已连接。");
+        } else if (error.name === "NotSupportedError") {
+          onError("当前浏览器不支持摄像头功能。");
+        } else {
+          onError(`摄像头启动失败: ${error.message}`);
+        }
+      } else {
+        onError("摄像头启动失败，请重试。");
+      }
     }
   };
 

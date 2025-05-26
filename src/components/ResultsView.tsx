@@ -207,37 +207,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
         </div>
       </div>
 
-      {/* Navigation */}
-      <div className="flex justify-between items-center px-6 py-4">
-        <button
-          onClick={prevIdea}
-          disabled={currentIndex === 0}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
-            currentIndex === 0
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          <span>←</span>
-          <span>上一个</span>
-        </button>
-
-        <div className="text-center">
-          <p className="text-xs text-gray-500 mb-1">左右滑动切换</p>
-        </div>
-
-        <button
-          onClick={nextIdea}
-          disabled={currentIndex === displayIdeas.length - 1}
-          className={`flex items-center space-x-2 px-4 py-2 rounded-lg font-medium transition-all ${
-            currentIndex === displayIdeas.length - 1
-              ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-          }`}
-        >
-          <span>下一个</span>
-          <span>→</span>
-        </button>
+      {/* Navigation Hint */}
+      <div className="text-center px-6 py-4">
+        <p className="text-sm text-gray-500">左右滑动切换创业想法</p>
       </div>
 
       {/* Bottom Actions */}
