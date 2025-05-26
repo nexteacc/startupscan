@@ -194,3 +194,30 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
 };
 
 export default ResultsView;
+
+// 在现有代码基础上添加
+const [isExpanded, setIsExpanded] = useState(false);
+
+const handleCardClick = () => {
+  setIsExpanded(!isExpanded);
+  setShowDetails(!showDetails);
+};
+
+// 修改 motion.div 配置
+<motion.div
+  animate={{
+    height: isExpanded ? 'auto' : 384,
+    scale: isExpanded ? 1.02 : 1,
+    y: isExpanded ? -20 : 0,
+    zIndex: isExpanded ? 10 : 1
+  }}
+  transition={{
+    type: "spring",
+    stiffness: 300,
+    damping: 25
+  }}
+  className={`absolute inset-0 cursor-pointer ${
+    isExpanded ? 'shadow-2xl' : 'shadow-xl'
+  }`}
+  onClick={handleCardClick}
+>
