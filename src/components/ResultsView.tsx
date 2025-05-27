@@ -20,32 +20,29 @@ interface ResultsViewProps {
 
 const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsViewProps) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
-  const [dragY, setDragY] = useState(0);
+
   const draggingIndex = useRef<number | null>(null);
   const displayIdeas = ideas.slice(0, 5);
 
   const handleCardClick = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
-    setDragY(0);
   };
 
   const handleBackgroundClick = () => {
     setExpandedIndex(null);
-    setDragY(0);
   };
-
   // 拖拽相关
-  const handleDragStart = (event: any, index: number) => {
+  const handleDragStart = (_: any, index: number) => {
     draggingIndex.current = index;
   };
-  const handleDrag = (event: any, info: any) => {
-    setDragY(info.point.y);
+  const handleDrag = () => {
+    // Drag feedback is now handled directly in handleDragEnd
   };
-  const handleDragEnd = (event: any, info: any) => {
-    if (dragY < -120) {
+  const handleDragEnd = (_: any, info: any) => {
+    if (info.offset.y < -120) {
       setExpandedIndex(draggingIndex.current);
     }
-    setDragY(0);
+
     draggingIndex.current = null;
   };
 
@@ -79,7 +76,11 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
             return (
               <motion.div
                 key={index}
-                className={`absolute w-full`} style={{zIndex}}
+                className={`absolute w-full`}
+                style={{
+                  zIndex,
+                  transformOrigin: 'center bottom'
+                }}
                 initial={{
                   y: stackOffset,
                   scale: 1 - scaleOffset,
@@ -99,14 +100,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
                   damping: 32,
                   duration: 0.45
                 }}
-                style={{
-                  transformOrigin: 'center bottom',
-                  zIndex
-                }}
                 drag={isTop && expandedIndex === null ? "y" : false}
                 dragConstraints={{ top: -180, bottom: 0 }}
                 dragElastic={0.18}
-                onDragStart={(e, info) => handleDragStart(e, index)}
+                onDragStart={(_) => handleDragStart(_, index)}
                 onDrag={handleDrag}
                 onDragEnd={handleDragEnd}
               >
