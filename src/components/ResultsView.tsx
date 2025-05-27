@@ -1,6 +1,6 @@
 import React from "react";
 import { useState, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface Idea {
   source: string;
