@@ -17,10 +17,11 @@ interface ResultsViewProps {
   onRetry?: () => void;   
 }
 
-const CARD_OFFSET = 30; // Vertical offset for stacked cards
-const SCALE_FACTOR = 0.03; // Scale difference between stacked cards
-const EXPANDED_CARD_TOP_MARGIN = 80; // Margin from top when a card is expanded
-const SCROLL_THRESHOLD_PER_CARD = 200; // How much scroll distance corresponds to focusing one card
+const CARD_HEIGHT = 250; // Approximate height of a card, similar to Gist
+const CARD_TITLE_HEIGHT = 50; // Approximate height of the visible part of a stacked card
+const CARD_PADDING = 10; // Padding for interpolation, similar to Gist
+const EXPANDED_CARD_TOP_MARGIN = 20; // Fine-tuned margin from top for expanded card
+const SCROLL_THRESHOLD_PER_CARD = CARD_HEIGHT * 0.8; // Scroll distance to transition one card
 
 const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsViewProps) => {
   const displayIdeas = ideas.slice(0, 5);
@@ -47,7 +48,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
       className="min-h-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col pt-8 overflow-y-auto relative"
     >
       {/* This div acts as the scrollable content area, its height determines total scroll range */}
-      <div style={{ height: `${displayIdeas.length * SCROLL_THRESHOLD_PER_CARD + (window.innerHeight - EXPANDED_CARD_TOP_MARGIN - 180)}px` }}> 
+      {/* Ensure enough scroll height for all cards to be focused + some buffer for the last card to expand fully */}
+      {/* Plus space for the button at the bottom */}
+      <div style={{ height: `${displayIdeas.length * SCROLL_THRESHOLD_PER_CARD + window.innerHeight}px` }}> 
       {/* Header */}
       <div className="text-center pb-8 sticky top-0 bg-gradient-to-br from-blue-50 to-indigo-100 z-50 pt-8">
         <h1 className="text-3xl font-bold text-gray-800">✨ Next BIG TOY ✨</h1>
@@ -56,9 +59,11 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
       {/* Card Stack Container - Adjusted for top alignment and Wallet feel */}
       {/* This container's height should be enough to allow cards to stack and one to expand */}
       {/* The actual scrolling will happen in the parent `scrollRef` div */}
-      <div className="flex-1 flex flex-col items-center px-4 relative mt-[-60px]"> {/* Negative margin to pull cards under sticky header initially */} 
+      <div className="flex-1 flex flex-col items-center px-4 relative mt-4"> {/* Adjusted marginTop from -60px to 4, to give some space below header */} 
         
-        <div className="relative w-full max-w-md" style={{ height: `${displayIdeas.length * CARD_OFFSET + 300}px` }}> {/* Static height for positioning context */}
+        {/* The height of this container should be enough for one expanded card and parts of others. Or, make it dynamic based on scroll. */}
+        {/* For now, let's ensure it's tall enough for the expanded card and some stacking context. */}
+        <div className="relative w-full max-w-md" style={{ height: `${CARD_HEIGHT + (displayIdeas.length -1) * CARD_TITLE_HEIGHT + 100}px` }}> {/* Adjusted height to better fit screen */}
           {displayIdeas.map((idea, index) => {
             // Define the scroll range for this card's animation
             // When scrollY is around `index * SCROLL_THRESHOLD_PER_CARD`, this card should be prominent.
@@ -86,27 +91,93 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
             // Card i should be at `EXPANDED_CARD_TOP_MARGIN` when `scrollY` is `i * SCROLL_THRESHOLD_PER_CARD`.
             // When `scrollY` is `(i-1) * SCROLL_THRESHOLD_PER_CARD`, card `i` should be at `EXPANDED_CARD_TOP_MARGIN + CARD_OFFSET` and scaled down.
             // When `scrollY` is `(i+1) * SCROLL_THRESHOLD_PER_CARD`, card `i` should be at `EXPANDED_CARD_TOP_MARGIN - CARD_OFFSET` (or some other position indicating it's being scrolled away).
-            
-            const dynamicY = useTransform(scrollY, (value) => {
-              const scrollPositionForThisCard = index * SCROLL_THRESHOLD_PER_CARD;
-              const diff = value - scrollPositionForThisCard;
+            // Re-implementing animation logic based on the Gist
+            // The core idea is to interpolate `translateY` based on `scrollY`
+            const inputRange = [-CARD_HEIGHT, 0];
+            const outputRange = [
+              CARD_HEIGHT * index, 
+              (CARD_HEIGHT - CARD_TITLE_HEIGHT) * -index
+            ];
 
-              if (diff >= 0) { // This card is active or has been scrolled past (upwards)
-                // If this card is active (diff is small), it should be at the top.
-                // If it's been scrolled past (diff is large), it should move up and away.
-                return EXPANDED_CARD_TOP_MARGIN - Math.min(diff, SCROLL_THRESHOLD_PER_CARD * 0.8); 
-              } else { // This card is upcoming (scrolling downwards towards it)
-                // It should be in its stacked position relative to the card that would be active at `value`.
-                // The base position is its initial stack offset, plus movement based on how far `value` is from its active point.
-                return EXPANDED_CARD_TOP_MARGIN + (index - value / SCROLL_THRESHOLD_PER_CARD) * CARD_OFFSET - diff * 0.5; 
+            if (index > 0) {
+              inputRange.push(CARD_PADDING * index);
+              outputRange.push((CARD_HEIGHT - CARD_PADDING) * -index - (CARD_TITLE_HEIGHT * index) + CARD_PADDING ); // Adjusted to better match Gist logic
+            }
+
+            const y = useTransform(scrollY, value => {
+              // This transform maps the global scrollY to a per-card animation progress
+              // We want the card to be fully visible when scrollY is at a point corresponding to this card's turn
+              // And stacked when scrollY is 0 (or before its turn)
+              // And scrolled away when scrollY is past its turn
+
+              // Let's define a scroll segment for each card
+              const scrollSegmentStart = (index) * SCROLL_THRESHOLD_PER_CARD;
+              const scrollSegmentEnd = (index + 1) * SCROLL_THRESHOLD_PER_CARD;
+              
+              // Relative scroll position within this card's segment (0 to 1)
+              let relativeScroll = (value - scrollSegmentStart) / SCROLL_THRESHOLD_PER_CARD;
+              relativeScroll = Math.max(0, Math.min(1, relativeScroll)); // Clamp between 0 and 1
+
+              // When relativeScroll is 0, card is stacked (or just starting to expand)
+              // When relativeScroll is 1, card is fully expanded (or just starting to collapse)
+              
+              // Interpolate Y based on Gist logic, adapted for framer-motion
+              // The Gist uses a single Animated.Value for all cards, here scrollY is global
+              // We need to derive a similar effect. Let's consider the state when this card is 'active'.
+              // When scrollY makes this card the 'active' one (e.g., scrollY is around index * SCROLL_THRESHOLD_PER_CARD)
+              // its y should be EXPANDED_CARD_TOP_MARGIN.
+              // Otherwise, it's stacked.
+
+              // Simplified Gist-like interpolation for translateY
+              // `t` is like the `y` value from the Gist, but derived from our global `scrollY`
+              // When `value` (our scrollY) is 0, all cards are stacked.
+              // As `value` increases, cards expand one by one.
+              const t = value - (index * (CARD_HEIGHT - CARD_TITLE_HEIGHT)); 
+              
+              let newY;
+              if (t <= 0) { // Card is stacked or in the process of being revealed from stack
+                newY = EXPANDED_CARD_TOP_MARGIN + index * CARD_TITLE_HEIGHT + t * 0.3; // Apply some of t to show movement
+              } else { // Card is expanded or being scrolled away
+                newY = EXPANDED_CARD_TOP_MARGIN - t * 0.7; // Move up as it's scrolled past
               }
+              // Add a base offset for initial stacking, which is counteracted as card becomes active
+              newY += index * CARD_TITLE_HEIGHT * (1 - relativeScroll); 
+              newY = Math.max(EXPANDED_CARD_TOP_MARGIN - (relativeScroll * CARD_HEIGHT * 0.5) , newY - (relativeScroll * CARD_TITLE_HEIGHT * index) );
+
+              // Let's try a direct adaptation of the Gist's interpolation logic
+              // The Gist's `y` is a direct animation value. Our `scrollY` is the driver.
+              // We need to map `scrollY` to a range that makes sense for the Gist's `inputRange` and `outputRange`.
+              // Let `y_gist_equivalent` be the value that would be passed to `interpolate` in the Gist.
+              // When `scrollY` = 0, `y_gist_equivalent` should be 0 (initial stacked state).
+              // When `scrollY` = `SCROLL_THRESHOLD_PER_CARD`, the first card is fully expanded.
+              // This means `y_gist_equivalent` should be around `-CARD_HEIGHT` for the first card to be at the top.
+              
+              // This mapping is tricky because the Gist's `y` is shared and drives all cards.
+              // Our `scrollY` is global. Let's simplify: when this card is active, it's at the top.
+              // When it's not, it's stacked. The transition is driven by `scrollY` relative to `index * SCROLL_THRESHOLD_PER_CARD`.
+
+              const progress = Math.min(1, Math.max(0, (value - (index * SCROLL_THRESHOLD_PER_CARD - CARD_HEIGHT * 0.5)) / (SCROLL_THRESHOLD_PER_CARD + CARD_HEIGHT*0.5) ));              
+              // `progress` = 0 means card is fully stacked below.
+              // `progress` = 1 means card is fully expanded at top.
+              
+              const stackedY = EXPANDED_CARD_TOP_MARGIN + index * CARD_TITLE_HEIGHT;
+              const expandedY = EXPANDED_CARD_TOP_MARGIN;
+              
+              // Interpolate between stacked and expanded based on progress
+              // And allow it to scroll off screen when progress > 1 (effectively)
+              const y_final = stackedY * (1 - progress) + expandedY * progress - Math.max(0, (value - (index + 0.5) * SCROLL_THRESHOLD_PER_CARD)) * 0.5;
+              return y_final;
             });
 
-            const scale = useTransform(
-              scrollY,
-              [cardScrollStart, cardScrollCenter, cardScrollEnd],
-              [initialScale * 0.9, 1, initialScale * 0.9]
-            );
+            const scale = useTransform(scrollY, value => {
+              const progress = Math.min(1, Math.max(0, (value - (index * SCROLL_THRESHOLD_PER_CARD - CARD_HEIGHT * 0.5)) / (SCROLL_THRESHOLD_PER_CARD + CARD_HEIGHT*0.5) )); // Same progress as y
+              const stackedScale = 1 - (index * 0.05); // More pronounced scale difference
+              const expandedScale = 1;
+              return stackedScale * (1 - progress) + expandedScale * progress;
+            });
+
+            // Use 'y' instead of 'dynamicY'
+            const dynamicY = y;
 
             const opacity = useTransform(
               scrollY,
