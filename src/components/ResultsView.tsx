@@ -1,5 +1,5 @@
 import React from "react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 
 interface Idea {
@@ -21,182 +21,162 @@ interface ResultsViewProps {
 const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsViewProps) => {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
-  const draggingIndex = useRef<number | null>(null);
   const displayIdeas = ideas.slice(0, 5);
 
   const handleCardClick = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
   };
 
+  // No need for a separate background click if clicking the expanded card itself closes it.
+  // Or, if we keep the overlay, this can stay.
   const handleBackgroundClick = () => {
     setExpandedIndex(null);
   };
-  // 拖拽相关
-  const handleDragStart = (_: any, index: number) => {
-    draggingIndex.current = index;
-  };
-  const handleDrag = () => {
-    // Drag feedback is now handled directly in handleDragEnd
-  };
-  const handleDragEnd = (_: any, info: any) => {
-    if (info.offset.y < -120) {
-      setExpandedIndex(draggingIndex.current);
-    }
 
-    draggingIndex.current = null;
-  };
+  // Drag functionality might need to be re-evaluated or simplified for Wallet-like interaction
+  // For now, let's disable drag to focus on click interaction
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col pt-8">
       {/* Header */}
-      <div className="text-center py-8">
+      <div className="text-center pb-8">
         <h1 className="text-3xl font-bold text-gray-800">✨ Next BIG TOY ✨</h1>
       </div>
 
-      {/* Card Stack Container */}
-      <div className="flex-1 flex items-center justify-center px-6 relative">
+      {/* Card Stack Container - Adjusted for top alignment and Wallet feel */}
+      <div className="flex-1 flex flex-col items-center px-4 relative">
         {/* Background Overlay for Expanded State */}
         {expandedIndex !== null && (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 z-40"
-            onClick={handleBackgroundClick}
+            className="fixed inset-0 bg-black/30 z-30" // Lower z-index than expanded card
+            onClick={handleBackgroundClick} // Click overlay to close
           />
         )}
         
-        <div className="relative w-full max-w-sm">
+        <div className="relative w-full max-w-md" style={{ height: `${displayIdeas.length * 60 + 200}px` }}> {/* Adjust height based on cards */}
           {displayIdeas.map((idea, index) => {
             const isExpanded = expandedIndex === index;
-            const isTop = index === displayIdeas.length - 1;
-            const stackOffset = (displayIdeas.length - 1 - index) * 16;
-            const scaleOffset = (displayIdeas.length - 1 - index) * 0.06;
-            const zIndex = isExpanded ? 100 : 10 + index;
+            // Determine the visual stacking order. Clicked card comes to front.
+            let displayOrder = displayIdeas.length - 1 - index;
+            if (expandedIndex !== null) {
+              if (index === expandedIndex) {
+                displayOrder = displayIdeas.length; // Expanded card is topmost
+              } else if (index > expandedIndex) {
+                displayOrder = displayIdeas.length - 1 - index + 1; 
+              } else {
+                displayOrder = displayIdeas.length - 1 - index;
+              }
+            }
+
+            const zIndex = isExpanded ? 40 : 10 + displayOrder;
+            const initialYOffset = index * 30; // Initial stacking closer like Wallet
+            const initialScale = 1 - (index * 0.03); // Subtle scaling for depth
+
             return (
               <motion.div
-                key={index}
-                className={`absolute w-full`}
+                key={idea.source + index} // Ensure unique key if ideas can change
+                className={`absolute w-full cursor-pointer`}
                 style={{
                   zIndex,
-                  transformOrigin: 'center bottom'
+                  transformOrigin: 'center center' // Changed for more direct expansion
                 }}
                 initial={{
-                  y: stackOffset,
-                  scale: 1 - scaleOffset,
-                  opacity: 0.85 + (index * 0.03),
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.12)"
+                  y: initialYOffset,
+                  scale: initialScale,
+                  opacity: 1, // All cards initially visible
                 }}
                 animate={{
-                  y: isExpanded ? -60 : stackOffset,
-                  scale: isExpanded ? 1.08 : 1 - scaleOffset,
-                  opacity: isExpanded ? 1 : (isTop ? 1 : 0.85 + (index * 0.03)),
-                  rotateX: isExpanded ? 0 : 0,
-                  boxShadow: isExpanded ? "0 16px 48px rgba(0,0,0,0.18)" : "0 8px 32px rgba(0,0,0,0.12)"
+                  y: isExpanded ? (window.innerHeight * 0.1) : initialYOffset + (expandedIndex !== null && index > expandedIndex ? 150 : 0), // Move card to near top when expanded, shift others down
+                  scale: isExpanded ? 1 : initialScale,
+                  opacity: isExpanded ? 1 : (expandedIndex !== null && index !== expandedIndex ? 0.7 : 1),
+                  rotateX: 0, // No X rotation for Wallet style
+                  boxShadow: isExpanded ? "0 25px 50px -12px rgba(0, 0, 0, 0.25)" : "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
                 }}
                 transition={{
                   type: "spring",
-                  stiffness: 320,
-                  damping: 32,
-                  duration: 0.45
+                  stiffness: 300,
+                  damping: 30,
                 }}
-                drag={isTop && expandedIndex === null ? "y" : false}
-                dragConstraints={{ top: -180, bottom: 0 }}
-                dragElastic={0.18}
-                onDragStart={(_) => handleDragStart(_, index)}
-                onDrag={handleDrag}
-                onDragEnd={handleDragEnd}
+                onClick={() => handleCardClick(index)} // Click any card to expand/collapse
               >
                 <motion.div
-                  className={`bg-white rounded-3xl shadow-xl overflow-hidden cursor-pointer border border-gray-100 ${isExpanded ? 'shadow-2xl scale-105' : ''}`}
-                  onClick={() => !isExpanded && isTop && handleCardClick(index)}
-                  whileHover={isTop && !isExpanded ? { scale: 1.03, boxShadow: "0 12px 36px rgba(0,0,0,0.16)" } : {}}
-                  whileTap={isTop && !isExpanded ? { scale: 0.97 } : {}}
+                  className={`bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200`}
                   animate={{
-                    height: isExpanded ? 'auto' : '260px',
-                    borderRadius: isExpanded ? "2.2rem" : "1.5rem"
+                    height: isExpanded ? 'auto' : '180px', // Adjust initial height
+                    borderRadius: isExpanded ? "1.25rem" : "1rem"
                   }}
                   transition={{
                     type: "spring",
-                    stiffness: 320,
-                    damping: 28
+                    stiffness: 300,
+                    damping: 30
                   }}
                 >
-                  <div className="p-6">
-                    {/* Card Header */}
-                    <div className="text-center mb-6">
-                      <div className="text-4xl mb-3">💡</div>
-                      <h2 className="text-xl font-bold text-gray-800">
+                  <div className={`p-5 ${isExpanded ? 'pb-8' : ''}`}> {/* More padding for expanded */}
+                    <div className="text-center mb-4">
+                      <div className="text-3xl mb-2">💡</div>
+                      <h2 className="text-lg font-semibold text-gray-700">
                         创业想法 {index + 1}
                       </h2>
                     </div>
 
-                    {/* Card Content - Collapsed State */}
                     {!isExpanded && (
-                      <div className="space-y-4">
-                        <div className="bg-blue-50 rounded-2xl p-4">
-                          <h3 className="font-semibold text-blue-800 mb-2 text-sm">📍 创意来源</h3>
-                          <p className="text-gray-700 text-sm leading-relaxed line-clamp-2">
+                      <div className="space-y-3">
+                        <div className="bg-blue-50 rounded-xl p-3">
+                          <h3 className="font-medium text-blue-700 text-xs mb-1">📍 创意来源</h3>
+                          <p className="text-gray-600 text-xs leading-snug line-clamp-2">
                             {idea.source}
                           </p>
                         </div>
-                        <div className="bg-gray-50 rounded-2xl p-4">
-                          <h3 className="font-semibold text-gray-800 mb-2 text-sm">💰 市场潜力</h3>
-                          <p className="text-gray-600 text-sm line-clamp-2">
+                        <div className="bg-gray-100 rounded-xl p-3">
+                          <h3 className="font-medium text-gray-700 text-xs mb-1">💰 市场潜力</h3>
+                          <p className="text-gray-500 text-xs leading-snug line-clamp-2">
                             {idea.market_potential}
                           </p>
                         </div>
                       </div>
                     )}
 
-                    {/* Card Content - Expanded State */}
                     {isExpanded && (
                       <motion.div
-                        initial={{ opacity: 0, y: 20 }}
+                        initial={{ opacity: 0, y: 15 }}
                         animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: 0.1 }}
-                        className="space-y-4 max-h-[60vh] overflow-y-auto"
+                        transition={{ duration: 0.25, delay: 0.1 }}
+                        className="space-y-3" // Removed max-h and overflow-y for single screen attempt
                       >
-                        <div className="bg-blue-50 rounded-2xl p-4">
-                          <h3 className="font-semibold text-blue-800 mb-2">📍 创意来源</h3>
+                        <div className="bg-blue-50 rounded-xl p-3">
+                          <h3 className="font-medium text-blue-700 text-sm mb-1">📍 创意来源</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.source}
                           </p>
                         </div>
-                        <div className="bg-gray-50 rounded-2xl p-4">
-                          <h3 className="font-semibold text-gray-800 mb-2">💰 市场潜力</h3>
+                        <div className="bg-gray-100 rounded-xl p-3">
+                          <h3 className="font-medium text-gray-700 text-sm mb-1">💰 市场潜力</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.market_potential}
                           </p>
                         </div>
-                        <div className="bg-green-50 rounded-2xl p-4">
-                          <h3 className="font-semibold text-green-800 mb-2">🎯 策略</h3>
+                        <div className="bg-green-50 rounded-xl p-3">
+                          <h3 className="font-medium text-green-700 text-sm mb-1">🎯 策略</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.strategy}
                           </p>
                         </div>
-                        <div className="bg-purple-50 rounded-2xl p-4">
-                          <h3 className="font-semibold text-purple-800 mb-2">📢 营销</h3>
+                        <div className="bg-purple-50 rounded-xl p-3">
+                          <h3 className="font-medium text-purple-700 text-sm mb-1">📢 营销</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.marketing}
                           </p>
                         </div>
-                        <div className="bg-orange-50 rounded-2xl p-4">
-                          <h3 className="font-semibold text-orange-800 mb-2">👥 目标用户</h3>
+                        <div className="bg-orange-50 rounded-xl p-3">
+                          <h3 className="font-medium text-orange-700 text-sm mb-1">👥 目标用户</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.target_audience}
                           </p>
                         </div>
-                        
-                        {/* Close Button */}
-                        <div className="pt-4 border-t border-gray-100">
-                          <button
-                            onClick={handleBackgroundClick}
-                            className="w-full py-3 px-4 bg-gray-500 text-white rounded-2xl font-medium transition-colors hover:bg-gray-600"
-                          >
-                            收起详情
-                          </button>
-                        </div>
+                        {/* Removed Close Button as per request */}
                       </motion.div>
                     )}
                   </div>
