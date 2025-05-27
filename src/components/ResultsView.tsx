@@ -120,7 +120,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
                     <div className="text-center mb-4">
                       <div className="text-3xl mb-2">💡</div>
                       <h2 className="text-lg font-semibold text-gray-700">
-                        创业想法 {index + 1}
+                        锦囊 {index + 1}
                       </h2>
                     </div>
 
@@ -149,7 +149,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
                         className="space-y-3"
                       >
                         <div className="bg-blue-50 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-700 text-sm mb-1">📍 创意来源</h3>
+                          <h3 className="font-medium text-blue-700 text-sm mb-1">创意来源</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.source}
                           </p>
@@ -191,9 +191,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
       <div className="px-6 pb-8 pt-4">
         <button
           onClick={onRetake}
-          className="w-full py-4 px-6 bg-blue-500 text-white rounded-3xl font-medium text-lg transition-colors hover:bg-blue-600 flex items-center justify-center space-x-2 shadow-lg"
+          className="w-1/3 py-4 px-6 bg-blue-500 text-white rounded-3xl font-medium text-lg transition-colors hover:bg-blue-600 flex items-center justify-center space-x-2 shadow-lg"
         >
-          <span>📸</span>
           <span>重新拍照</span>
         </button>
       </div>
