@@ -1,5 +1,5 @@
 import React, { useState, useRef } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { motion } from "framer-motion";
 
 interface Idea {
   source: string;
@@ -17,9 +17,7 @@ interface ResultsViewProps {
   onRetry?: () => void;   
 }
 
-const CARD_HEIGHT = 250;
-const CARD_TITLE_HEIGHT = 50;
-const SCROLL_THRESHOLD_PER_CARD = CARD_HEIGHT * 0.8;
+
 
 const CARD_OFFSET = 60;
 const SCALE_FACTOR = 0.03;
@@ -27,7 +25,7 @@ const SCALE_FACTOR = 0.03;
 const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsViewProps) => {
   const displayIdeas = ideas.slice(0, 5);
   const scrollRef = useRef<HTMLDivElement>(null);
-  const { scrollY } = useScroll({ container: scrollRef });
+
 
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
@@ -44,105 +42,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
       ref={scrollRef}
       className="min-h-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col pt-8 overflow-y-auto relative"
     >
-      <div style={{ height: `${displayIdeas.length * SCROLL_THRESHOLD_PER_CARD + window.innerHeight}px` }}> 
-      <div className="text-center pb-8 sticky top-0 bg-gradient-to-br from-blue-50 to-indigo-100 z-50 pt-8">
-        <h1 className="text-3xl font-bold text-gray-800">✨ Next BIG TOY ✨</h1>
-      </div>
 
-      <div className="flex-1 flex flex-col items-center px-4 relative mt-4"> 
-        
-        <div className="relative w-full max-w-md" style={{ height: `${CARD_HEIGHT + (displayIdeas.length -1) * CARD_TITLE_HEIGHT + 100}px` }}> 
-          {displayIdeas.map((idea, index) => {
-            const cardScrollStart = (index - 1) * SCROLL_THRESHOLD_PER_CARD;
-            const cardScrollCenter = index * SCROLL_THRESHOLD_PER_CARD;
-            const cardScrollEnd = (index + 1) * SCROLL_THRESHOLD_PER_CARD;
 
-            const opacity = useTransform(
-              scrollY,
-              [cardScrollStart, cardScrollCenter, cardScrollEnd],
-              [0.7, 1, 0.7]
-            );
-
-            const zIndex = displayIdeas.length - index; 
-
-            return (
-              <motion.div
-                key={idea.source + index}
-                className={`absolute w-full cursor-pointer`}
-                style={{
-                  zIndex,
-                  transformOrigin: 'center center',
-                  opacity: opacity,
-                  boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)"
-                }}
-                onClick={() => handleCardClick(index)}
-              >
-                <motion.div
-                  className={`bg-white rounded-2xl shadow-lg overflow-hidden border border-gray-200`}
-                  style={{ height: 'auto' }}
-                >
-                  <div className={`p-5`}>
-                    <div className="text-center mb-4">
-                      <div className="text-3xl mb-2">💡</div>
-                      <h2 className="text-lg font-semibold text-gray-700">
-                        创业想法 {index + 1}
-                      </h2>
-                    </div>
-
-                    <motion.div
-                      className="space-y-3"
-                      style={{
-                      }}
-                    >
-                      <div className="bg-blue-50 rounded-xl p-3">
-                        <h3 className="font-medium text-blue-700 text-sm mb-1">📍 创意来源</h3>
-                        <p className="text-gray-700 text-sm leading-relaxed">
-                          {idea.source}
-                        </p>
-                      </div>
-                      <div className="bg-gray-100 rounded-xl p-3">
-                        <h3 className="font-medium text-gray-700 text-sm mb-1">💰 市场潜力</h3>
-                        <p className="text-gray-700 text-sm leading-relaxed">
-                          {idea.market_potential}
-                        </p>
-                      </div>
-                      <div className="bg-green-50 rounded-xl p-3">
-                        <h3 className="font-medium text-green-700 text-sm mb-1">🎯 策略</h3>
-                        <p className="text-gray-700 text-sm leading-relaxed">
-                          {idea.strategy}
-                        </p>
-                      </div>
-                      <div className="bg-purple-50 rounded-xl p-3">
-                        <h3 className="font-medium text-purple-700 text-sm mb-1">📢 营销</h3>
-                        <p className="text-gray-700 text-sm leading-relaxed">
-                          {idea.marketing}
-                        </p>
-                      </div>
-                      <div className="bg-orange-50 rounded-xl p-3">
-                        <h3 className="font-medium text-orange-700 text-sm mb-1">👥 目标用户</h3>
-                        <p className="text-gray-700 text-sm leading-relaxed">
-                          {idea.target_audience}
-                        </p>
-                      </div>
-                    </motion.div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="px-6 pb-8 pt-4 sticky bottom-0 bg-gradient-to-br from-blue-50 to-indigo-100 z-50">
-        <button
-          onClick={onRetake}
-          className="w-full py-4 px-6 bg-blue-500 text-white rounded-3xl font-medium text-lg transition-colors hover:bg-blue-600 flex items-center justify-center space-x-2 shadow-lg"
-        >
-          <span>📸</span>
-          <span>重新拍照</span>
-        </button>
-      </div>
-    </div>
       <div className="text-center pb-8">
         <h1 className="text-3xl font-bold text-gray-800">✨ Next BIG TOY ✨</h1>
       </div>
