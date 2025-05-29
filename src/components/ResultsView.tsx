@@ -188,10 +188,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
         </div>
       </div>
 
-      <div className="px-6 pb-8 pt-4">
+      <div className="px-6 pb-8 pt-4 flex justify-center">
         <button
           onClick={onRetake}
-          className="w-1/3 py-4 px-6 bg-blue-500 text-white rounded-3xl font-medium text-lg transition-colors hover:bg-blue-600 flex items-center justify-center space-x-2 shadow-lg"
+          className="w-1/2 py-4 px-6 bg-blue-500 text-white rounded-3xl text-lg transition-colors hover:bg-blue-600 flex items-center justify-center space-x-2 shadow-lg"
         >
           <span>重新拍照</span>
         </button>
