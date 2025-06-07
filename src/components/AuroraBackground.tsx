@@ -22,7 +22,7 @@ export const AuroraBackground = ({
         )}
         {...props}
       >
-        {/* 背景效果层 - 保持 pointer-events-none */}
+        {/* Background effects layer - keep pointer-events-none */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <div
             className={cn(
@@ -45,7 +45,7 @@ export const AuroraBackground = ({
             )}
           />
         </div>
-        {/* 内容层 - 移除 pointer-events-none */}
+        {/* Content layer - remove pointer-events-none */}
         <div className="relative z-10">{children}</div>
       </div>
     </main>

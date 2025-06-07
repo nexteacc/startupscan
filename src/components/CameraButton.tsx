@@ -24,16 +24,16 @@ export const CameraButton = ({ onCameraStart, onError }: CameraButtonProps) => {
       console.error("Camera access error:", error);
       if (error instanceof Error) {
         if (error.name === "NotAllowedError") {
-          onError("摄像头权限被拒绝。请在浏览器设置中允许摄像头访问权限。");
+          onError("Camera permission denied. Please allow camera access in your browser settings.");
         } else if (error.name === "NotFoundError") {
-          onError("未找到摄像头设备。请确保设备已连接。");
+          onError("No camera device found. Please ensure your device is connected.");
         } else if (error.name === "NotSupportedError") {
-          onError("当前浏览器不支持摄像头功能。");
+          onError("Camera not supported in this browser.");
         } else {
-          onError(`摄像头启动失败: ${error.message}`);
+          onError(`Failed to start camera: ${error.message}`);
         }
       } else {
-        onError("摄像头启动失败，请重试。");
+        onError("Failed to start camera, please try again.");
       }
     }
   };

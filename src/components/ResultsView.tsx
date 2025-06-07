@@ -120,20 +120,20 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
                     <div className="text-center mb-4">
                       <div className="text-3xl mb-2">💡</div>
                       <h2 className="text-lg font-semibold text-gray-700">
-                        锦囊 {index + 1}
+                        Idea Kit {index + 1}
                       </h2>
                     </div>
 
                     {!isExpanded && (
                       <div className="space-y-3">
                         <div className="bg-blue-50 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-700 text-xs mb-1">📍 创意来源</h3>
+                          <h3 className="font-medium text-blue-700 text-xs mb-1">📍 Idea Source</h3>
                           <p className="text-gray-600 text-xs leading-snug line-clamp-2">
                             {idea.source}
                           </p>
                         </div>
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-gray-700 text-xs mb-1">💰 市场潜力</h3>
+                          <h3 className="font-medium text-gray-700 text-xs mb-1">💰 Market Potential</h3>
                           <p className="text-gray-500 text-xs leading-snug line-clamp-2">
                             {idea.market_potential}
                           </p>
@@ -149,31 +149,31 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
                         className="space-y-3"
                       >
                         <div className="bg-blue-50 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-700 text-sm mb-1">创意来源</h3>
+                          <h3 className="font-medium text-blue-700 text-sm mb-1">Idea Source</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.source}
                           </p>
                         </div>
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-gray-700 text-sm mb-1">💰 市场潜力</h3>
+                          <h3 className="font-medium text-gray-700 text-sm mb-1">💰 Market Potential</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.market_potential}
                           </p>
                         </div>
                         <div className="bg-green-50 rounded-xl p-3">
-                          <h3 className="font-medium text-green-700 text-sm mb-1">🎯 策略</h3>
+                          <h3 className="font-medium text-green-700 text-sm mb-1">🎯 Strategy</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.strategy}
                           </p>
                         </div>
                         <div className="bg-purple-50 rounded-xl p-3">
-                          <h3 className="font-medium text-purple-700 text-sm mb-1">📢 营销</h3>
+                          <h3 className="font-medium text-purple-700 text-sm mb-1">📢 Marketing</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.marketing}
                           </p>
                         </div>
                         <div className="bg-orange-50 rounded-xl p-3">
-                          <h3 className="font-medium text-orange-700 text-sm mb-1">👥 目标用户</h3>
+                          <h3 className="font-medium text-orange-700 text-sm mb-1">👥 Target Audience</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.target_audience}
                           </p>
@@ -193,7 +193,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
           onClick={onRetake}
           className="w-1/2 py-4 px-6 bg-blue-500 text-white rounded-3xl text-lg transition-colors hover:bg-blue-600 flex items-center justify-center space-x-2 shadow-lg"
         >
-          <span>重新拍照</span>
+          <span>Retake Photo</span>
         </button>
       </div>
     </div>
