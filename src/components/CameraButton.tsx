@@ -41,7 +41,7 @@ export const CameraButton = ({ onCameraStart, onError }: CameraButtonProps) => {
   return (
     <button
       onClick={startCamera}
-      className="flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+      className="flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transition-colors"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"
