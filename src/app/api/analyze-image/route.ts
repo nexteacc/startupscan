@@ -115,8 +115,14 @@ function buildSchema(descriptionNote: string) {
 }
 
 function parseResponseJson(response: OpenAIResponse) {
+  // 修复：增加类型守卫，确保只处理包含 content 的消息项
   const textBlock = response.output
-    ?.flatMap((item) => item.content)
+    ?.flatMap((item) => {
+      if ("content" in item && item.content) {
+        return item.content;
+      }
+      return [];
+    })
     .find((part) => part.type === "output_text");
 
   if (!textBlock || textBlock.type !== "output_text") {
@@ -147,7 +153,7 @@ export async function POST(request: NextRequest) {
     const languageConfig = getLanguageConfig(language);
 
     const completion = await openai.responses.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-4.1-mini", // 确保此处模型名称与您的权限匹配
       input: [
         {
           role: "system",
