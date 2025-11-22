@@ -1,3 +1,5 @@
+'use client';
+
 interface CameraButtonProps {
   onCameraStart: (stream: MediaStream) => void;
   onError: (message: string) => void;

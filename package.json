@@ -1,40 +1,37 @@
 {
-  "name": "react-vite-ts",
+  "name": "next-app",
+  "version": "0.1.0",
   "private": true,
-  "version": "0.0.0",
-  "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc && vite build",
-    "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint"
   },
   "dependencies": {
-    "@clerk/clerk-react": "5.24.2",
-    "clsx": "2.1.1",
+    "@clerk/nextjs": "^5.4.3",
+    "clsx": "^2.1.1",
+    "creem": "^0.3.37",
     "framer-motion": "^12.12.2",
-    "openai": "4.87.3",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-webcam": "7.2.0",
+    "next": "16.0.3",
+    "openai": "^4.87.3",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "react-webcam": "^7.2.0",
     "styled-components": "^6.1.17",
-    "tailwind-merge": "3.0.2",
-    "vite-plugin-pwa": "0.21.1",
-    "zod": "3.24.2"
+    "tailwind-merge": "^3.0.2",
+    "zod": "^3.24.2"
   },
   "devDependencies": {
-    "@types/react": "^19.0.0",
-    "@types/react-dom": "^19.0.0",
-    "@typescript-eslint/eslint-plugin": "^8.17.0",
-    "@typescript-eslint/parser": "^8.17.0",
-    "@vitejs/plugin-react": "^4.3.4",
-    "autoprefixer": "10.4.20",
-    "eslint": "^9.16.0",
-    "eslint-plugin-react-hooks": "^5.1.0",
-    "eslint-plugin-react-refresh": "^0.4.16",
-    "postcss": "8.4.49",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "autoprefixer": "^10.4.20",
+    "babel-plugin-react-compiler": "1.0.0",
+    "eslint": "^9",
+    "eslint-config-next": "16.0.3",
+    "postcss": "^8.4.49",
     "tailwindcss": "3.4.16",
-    "typescript": "^5.7.2",
-    "vite": "^6.0.3"
+    "typescript": "^5"
   }
 }

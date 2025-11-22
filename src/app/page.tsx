@@ -1,10 +1,17 @@
-import { useState } from "react";
-import { CameraButton } from "./components/CameraButton";
-import { AuroraBackground } from "./components/AuroraBackground";
-import { CameraView } from "./components/CameraView";
-import ResultsView from "./components/ResultsView";
-import { SignIn, SignedIn, SignedOut, useClerk } from "@clerk/clerk-react";
-import { useCallback } from "react";
+'use client';
+
+import { useCallback, useState } from "react";
+import {
+  SignIn,
+  SignedIn,
+  SignedOut,
+  useClerk,
+  useUser,
+} from "@clerk/nextjs";
+import { AuroraBackground } from "@/components/AuroraBackground";
+import { CameraButton } from "@/components/CameraButton";
+import { CameraView } from "@/components/CameraView";
+import ResultsView from "@/components/ResultsView";
 
 interface Idea {
   source: string;
@@ -14,12 +21,16 @@ interface Idea {
   target_audience: string;
 }
 
-function App() {
-  const { signOut, user } = useClerk();
-  const [cameraState, setCameraState] = useState<"idle" | "active" | "results">("idle");
+type CameraState = "idle" | "active" | "results";
 
+const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
+
+export default function HomePage() {
+  const { signOut } = useClerk();
+  const { user } = useUser();
+  const [cameraState, setCameraState] = useState<CameraState>("idle");
   const [ideas, setIdeas] = useState<Idea[]>([]);
-
   const [errorMessage, setErrorMessage] = useState("");
   const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,43 +44,73 @@ function App() {
     }
   }, [mediaStream]);
 
+  const analyzeIdeas = useCallback(
+    async (imageUrl: string) => {
+      const response = await fetch("/api/analyze-image", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: user?.id ?? "defaultUserId",
+          image_url: imageUrl,
+        }),
+      });
 
+      if (!response.ok) {
+        throw new Error("Analysis failed");
+      }
+
+      const data = await response.json();
+      setIdeas(
+        data.ideas.map((idea: Idea) => ({
+          source: idea.source.trim(),
+          strategy: idea.strategy.trim(),
+          marketing: idea.marketing.trim(),
+          market_potential: idea.market_potential.trim(),
+          target_audience: idea.target_audience.trim(),
+        }))
+      );
+    },
+    [user?.id]
+  );
 
   const handleCapture = useCallback(
     async (image: string) => {
       try {
         setIsLoading(true);
         setErrorMessage("");
-        
-        
+
         if (mediaStream) {
           mediaStream.getTracks().forEach((track) => track.stop());
           setMediaStream(null);
-        }
-        
-        if (!image || image.length < 100) {
-          throw new Error("Invalid image data");
         }
 
         if (!user?.id) {
           throw new Error("User ID is missing");
         }
 
+        if (!image || image.length < 100) {
+          throw new Error("Invalid image data");
+        }
 
         const base64Data = image.split(",")[1];
         if (!base64Data) {
           throw new Error("Invalid Base64 image data");
         }
 
+        if (!cloudName || !uploadPreset) {
+          throw new Error("Cloudinary is not configured");
+        }
 
-        const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${import.meta.env.VITE_CLOUDINARY_CLOUD_NAME}/image/upload`;
+        const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
         const formData = new FormData();
-        formData.append('file', `data:image/png;base64,${base64Data}`);
-        formData.append('upload_preset', import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
+        formData.append("file", `data:image/png;base64,${base64Data}`);
+        formData.append("upload_preset", uploadPreset);
 
         const response = await fetch(cloudinaryUrl, {
-          method: 'POST',
-          body: formData
+          method: "POST",
+          body: formData,
         });
 
         const responseJson = await response.json();
@@ -77,39 +118,11 @@ function App() {
           throw new Error(responseJson.message || "Image upload failed");
         }
 
-
         const imageUrl = responseJson.secure_url;
         setLastImageUrl(imageUrl);
-        
-        const ideasResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze-image`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            userId: user?.id || "defaultUserId", 
-            image_url: imageUrl
-          })
-        });
 
-        if (ideasResponse.status === 200) {
-          const data = await ideasResponse.json();
-          setIdeas(
-            data.ideas.map((idea: Idea) => ({
-              source: idea.source.trim(),
-              strategy: idea.strategy.trim(),
-              marketing: idea.marketing.trim(),
-              market_potential: idea.market_potential.trim(),
-              target_audience: idea.target_audience.trim()
-            }))
-          );
-        } else {
-          
-          setErrorMessage(' Analysis failed');
-        }
-        
+        await analyzeIdeas(imageUrl);
         setCameraState("results");
-
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : "Unknown error");
         setCameraState("results");
@@ -117,66 +130,44 @@ function App() {
         setIsLoading(false);
       }
     },
-    [user, mediaStream] 
+    [analyzeIdeas, mediaStream, user?.id]
   );
+
+  const handleRetry = useCallback(async () => {
+    if (!lastImageUrl) return;
+    try {
+      setIsLoading(true);
+      setErrorMessage("");
+      await analyzeIdeas(lastImageUrl);
+    } catch (error) {
+      setErrorMessage(error instanceof Error ? error.message : "Unknown error");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [analyzeIdeas, lastImageUrl]);
 
   return (
     <>
       <SignedIn>
         {cameraState === "active" ? (
-          <CameraView 
-            onExit={handleExit} 
-            onCapture={handleCapture} 
-            isLoading={isLoading}  
+          <CameraView
+            onExit={handleExit}
+            onCapture={handleCapture}
+            isLoading={isLoading}
           />
         ) : cameraState === "results" ? (
           <ResultsView
             ideas={ideas}
             errorMessage={errorMessage}
-            onRetry={() => {
-              if (lastImageUrl) {
-                setIsLoading(true);
-                setErrorMessage("");
-                fetch(`${import.meta.env.VITE_API_BASE_URL}/analyze-image`, {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify({
-                    userId: user?.id || "defaultUserId",
-                    image_url: lastImageUrl
-                  })
-                })
-                .then(response => {
-                  if (!response.ok) throw new Error('Analysis failed');
-                  return response.json();
-                })
-                .then(ideasResult => {
-                  const cleanedIdeas = ideasResult.ideas.map((idea: Idea) => ({
-                    source: idea.source.trim(),
-                    strategy: idea.strategy.trim(),
-                    marketing: idea.marketing.trim(),
-                    market_potential: idea.market_potential.trim(),
-                    target_audience: idea.target_audience.trim()
-                  }));
-                  setIdeas(cleanedIdeas);
-                })
-                .catch(error => {
-                  setErrorMessage(error instanceof Error ? error.message : "Unknown error");
-                })
-                .finally(() => {
-                  setIsLoading(false);
-                });
-              }
-            }}
+            onRetry={handleRetry}
             onBack={() => {
-              setIdeas([]); 
+              setIdeas([]);
               setCameraState("idle");
             }}
             onRetake={() => {
               setIdeas([]);
               setErrorMessage("");
-              setCameraState("active"); 
+              setCameraState("active");
             }}
           />
         ) : (
@@ -186,7 +177,9 @@ function App() {
                 {errorMessage && (
                   <div className="text-red-500 mb-4">{errorMessage}</div>
                 )}
-                {isLoading && <div className="mb-4">Collecting inspiration, please wait...</div>}
+                {isLoading && (
+                  <div className="mb-4">Collecting inspiration, please wait...</div>
+                )}
                 {!isLoading && (
                   <CameraButton
                     onCameraStart={(stream) => {
@@ -238,5 +231,3 @@ function App() {
     </>
   );
 }
-
-export default App;

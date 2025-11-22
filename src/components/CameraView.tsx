@@ -1,3 +1,6 @@
+'use client';
+/* eslint-disable @next/next/no-img-element */
+
 import { useEffect, useRef, useState } from "react";
 
 interface CameraViewProps {
@@ -9,10 +12,11 @@ interface CameraViewProps {
 export const CameraView = ({ onExit, onCapture, isLoading }: CameraViewProps) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const [stream, setStream] = useState<MediaStream | null>(null);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
   useEffect(() => {
+    let activeStream: MediaStream | null = null;
+
     const startCamera = async () => {
       try {
         const mediaStream = await navigator.mediaDevices.getUserMedia({
@@ -22,7 +26,7 @@ export const CameraView = ({ onExit, onCapture, isLoading }: CameraViewProps) =>
             height: { ideal: 1080 },
           },
         });
-        setStream(mediaStream);
+        activeStream = mediaStream;
         if (videoRef.current) {
           videoRef.current.srcObject = mediaStream;
         }
@@ -34,8 +38,8 @@ export const CameraView = ({ onExit, onCapture, isLoading }: CameraViewProps) =>
     startCamera();
 
     return () => {
-      if (stream) {
-        stream.getTracks().forEach((track) => track.stop());
+      if (activeStream) {
+        activeStream.getTracks().forEach((track) => track.stop());
       }
     };
   }, []);
@@ -75,7 +79,6 @@ export const CameraView = ({ onExit, onCapture, isLoading }: CameraViewProps) =>
             playsInline
             muted
             controls={false}
-            webkit-playsinline="true"
             onLoadedMetadata={() => {
               if (videoRef.current) videoRef.current.play();
             }}

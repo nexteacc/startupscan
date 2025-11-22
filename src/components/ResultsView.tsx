@@ -1,4 +1,6 @@
-import React, { useState, useRef } from "react";
+'use client';
+
+import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 
 interface Idea {
@@ -13,21 +15,27 @@ interface ResultsViewProps {
   ideas: Idea[];
   onRetake: () => void;
   onBack?: () => void;
-  errorMessage?: string;  
-  onRetry?: () => void;   
+  errorMessage?: string;
+  onRetry?: () => void;
 }
-
-
 
 const CARD_OFFSET = 60;
 const SCALE_FACTOR = 0.03;
 
-const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsViewProps) => {
+const ResultsView: React.FC<ResultsViewProps> = ({
+  ideas,
+  onRetake,
+  onBack,
+  errorMessage,
+  onRetry,
+}: ResultsViewProps) => {
   const displayIdeas = ideas.slice(0, 5);
   const scrollRef = useRef<HTMLDivElement>(null);
 
 
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
+  const viewportOffset =
+    typeof window === "undefined" ? 0 : window.innerHeight * 0.1;
 
   const handleCardClick = (index: number) => {
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -91,7 +99,10 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
                   opacity: 1,
                 }}
                 animate={{
-                  y: isExpanded ? (window.innerHeight * 0.1) : initialYOffset + (expandedIndex !== null && index > expandedIndex ? 150 : 0),
+                  y: isExpanded
+                    ? viewportOffset
+                    : initialYOffset +
+                      (expandedIndex !== null && index > expandedIndex ? 150 : 0),
                   scale: isExpanded ? 1 : initialScale,
                   opacity: isExpanded ? 1 : (expandedIndex !== null && index !== expandedIndex ? 0.7 : 1),
                   rotateX: 0,
@@ -188,13 +199,36 @@ const ResultsView: React.FC<ResultsViewProps> = ({ ideas, onRetake }: ResultsVie
         </div>
       </div>
 
-      <div className="px-6 pb-8 pt-4 flex justify-center">
-        <button
-          onClick={onRetake}
-          className="w-1/2 py-4 px-6 bg-blue-500 text-white rounded-3xl text-lg transition-colors hover:bg-blue-600 flex items-center justify-center space-x-2 shadow-lg"
-        >
-          <span>Retake Photo</span>
-        </button>
+      <div className="px-6 pb-8 pt-4 flex flex-col items-center gap-4">
+        {errorMessage && (
+          <div className="text-red-500 text-sm text-center max-w-md">
+            {errorMessage}
+          </div>
+        )}
+        <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="w-full py-3 px-4 rounded-3xl border border-blue-200 text-blue-600 text-base font-medium bg-white shadow"
+            >
+              Back Home
+            </button>
+          )}
+          <button
+            onClick={onRetake}
+            className="w-full py-3 px-4 bg-blue-500 text-white rounded-3xl text-base font-medium transition-colors hover:bg-blue-600 shadow"
+          >
+            Retake Photo
+          </button>
+        </div>
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="text-sm text-blue-600 underline underline-offset-4"
+          >
+            Retry Analysis
+          </button>
+        )}
       </div>
     </div>
   );
