@@ -115,11 +115,10 @@ function buildSchema(descriptionNote: string) {
 }
 
 function parseResponseJson(response: OpenAIResponse) {
-  // 修复：增加类型守卫，确保只处理包含 content 的消息项
   const textBlock = response.output
     ?.flatMap((item) => {
-      // 检查 item 是否包含 content 属性 (这是 Responses API 中 Text Message 的特征)
-      if ("content" in item && item.content) {
+      // 严格检查：Responses API 返回的 Item 如果包含 content，则为文本消息
+      if ("content" in item && Array.isArray(item.content)) {
         return item.content;
       }
       return [];
@@ -153,10 +152,10 @@ export async function POST(request: NextRequest) {
 
     const languageConfig = getLanguageConfig(language);
 
-    // 核心修复：适配 Responses API 的新参数结构
+    // 使用 Responses API (v2) 的正确参数结构
     const completion = await openai.responses.create({
-      model: "gpt-4.1-mini", // 确保您有权访问此模型，否则请改回 gpt-4o
-      // 1. System Prompt 移至 'instructions'
+      model: "gpt-4.1-mini", // 确保模型名称正确，如权限受限请改回 "gpt-4o"
+      // 1. 系统提示词移入 instructions 字段
       instructions: buildPrompt(languageConfig),
       input: [
         {
@@ -167,7 +166,7 @@ export async function POST(request: NextRequest) {
               text: "Generate five contrarian startup ideas that invert the business model implied by this photo. Fill every field from the schema.",
             },
             {
-              // 2. 图片类型修正为 'input_image'，且 image_url 直接传字符串
+              // 2. 图片类型修正为 "input_image"，image_url 直接传字符串
               type: "input_image",
               image_url: image_url,
             },
