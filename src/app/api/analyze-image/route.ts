@@ -3,6 +3,7 @@ import OpenAI from "openai";
 import type { Response as OpenAIResponse } from "openai/resources/responses/responses";
 import { z } from "zod";
 
+// 1. 定义 Zod Schema（用于二次校验响应）
 const IdeaSchema = z.object({
   source: z.string().default("Discovering"),
   strategy: z.string().default("Collecting more inspiration..."),
@@ -11,6 +12,7 @@ const IdeaSchema = z.object({
   target_audience: z.string().default("Unknown"),
 });
 
+// 2. 多语言配置
 const LANGUAGE_CONFIG = {
   en: {
     code: "en",
@@ -51,7 +53,9 @@ function getLanguageConfig(language: string) {
   return LANGUAGE_CONFIG[normalized] ?? LANGUAGE_CONFIG.en;
 }
 
-function buildPrompt(languageConfig: (typeof LANGUAGE_CONFIG)[SupportedLanguage]) {
+function buildPrompt(
+  languageConfig: (typeof LANGUAGE_CONFIG)[SupportedLanguage]
+) {
   return [
     "You are a venture strategist with exceptional divergent thinking skills.",
     "Given a photo, you must extract the implicit, dominant business model shown in the image and generate five contrarian startup ideas that invert or subvert that model.",
@@ -61,6 +65,7 @@ function buildPrompt(languageConfig: (typeof LANGUAGE_CONFIG)[SupportedLanguage]
   ].join(" ");
 }
 
+// 这里的返回结构专门给 text.format 使用
 function buildSchema(descriptionNote: string) {
   return {
     name: "startup_ideas",
@@ -72,7 +77,8 @@ function buildSchema(descriptionNote: string) {
           type: "array",
           minItems: 5,
           maxItems: 5,
-          description: "Exactly five contrarian startup idea kits derived from the photo.",
+          description:
+            "Exactly five contrarian startup idea kits derived from the photo.",
           items: {
             type: "object",
             properties: {
@@ -114,10 +120,11 @@ function buildSchema(descriptionNote: string) {
   };
 }
 
+// 3. 解析 Responses API 返回（Structured Outputs 情况）
 function parseResponseJson(response: OpenAIResponse) {
   const textBlock = response.output
     ?.flatMap((item) => {
-      if ("content" in item && item.content) {
+      if (item.type === "message" && item.content) {
         return item.content;
       }
       return [];
@@ -152,8 +159,12 @@ export async function POST(request: NextRequest) {
     const languageConfig = getLanguageConfig(language);
 
     const completion = await openai.responses.create({
-      model: "gpt-4.1-mini",
+      model: "gpt-4o-mini", // 支持多模态与 Structured Outputs 的模型
+
+      // 系统指令放在 instructions
       instructions: buildPrompt(languageConfig),
+
+      // 用户输入：文字 + 图片（多模态）
       input: [
         {
           role: "user",
@@ -164,22 +175,29 @@ export async function POST(request: NextRequest) {
             },
             {
               type: "input_image",
-              image_url: image_url,
-              detail: "auto", // 关键修复：必须包含 detail 字段
+              image_url: image_url, // 直接传字符串 URL
+              detail: "auto", // 可选字段，auto/low/high
             },
           ],
         },
       ],
-      response_format: {
-        type: "json_schema",
-        json_schema: buildSchema(languageConfig.fieldNote),
+
+      // 使用 Structured Outputs 的 text.format + json_schema
+      text: {
+        format: {
+          type: "json_schema",
+          ...buildSchema(languageConfig.fieldNote),
+        },
       },
+
       temperature: 1.2,
       top_p: 0.8,
       max_output_tokens: 2048,
     });
 
     const parsedContent = parseResponseJson(completion);
+
+    // 用 Zod 再做一层类型/默认值校验
     const validatedIdeas = IdeaSchema.array().parse(parsedContent.ideas);
 
     return NextResponse.json({ status: "success", ideas: validatedIdeas });
