@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
+import type { Response as OpenAIResponse } from "openai/resources/responses/responses";
 import { z } from "zod";
 
 const IdeaSchema = z.object({
@@ -10,22 +11,119 @@ const IdeaSchema = z.object({
   target_audience: z.string().default("Unknown"),
 });
 
+const LANGUAGE_CONFIG = {
+  en: {
+    code: "en",
+    instruction:
+      "Respond in professional English only. Do not use any other language, emoji, or transliteration.",
+    fieldNote:
+      "Write concise English sentences (max 60 words) highlighting contrarian insights.",
+  },
+  zh: {
+    code: "zh",
+    instruction:
+      "所有输出字段必须使用简体中文，不要包含任何英文、拼音或其他语言。",
+    fieldNote: "使用简洁清晰的中文叙述，每个字段不超过 60 个字。",
+  },
+  fr: {
+    code: "fr",
+    instruction:
+      "Répondez uniquement en français naturel, sans mots anglais ni emoji.",
+    fieldNote:
+      "Rédigez des phrases concises en français (maximum 60 mots) en mettant l'accent sur l'approche contrarienne.",
+  },
+  ja: {
+    code: "ja",
+    instruction:
+      "出力はすべて自然な日本語で記述し、英語や絵文字は使用しないでください。",
+    fieldNote: "各フィールドは 60 語以内で、対極的な視点を強調してください。",
+  },
+} as const;
+
+type SupportedLanguage = keyof typeof LANGUAGE_CONFIG;
+
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-function getLanguagePrompt(language: string) {
-  switch (language) {
-    case "zh":
-      return "请用中文回答。";
-    case "fr":
-      return "Veuillez répondre en français.";
-    case "ja":
-      return "日本語でお答えください。";
-    case "en":
-    default:
-      return "Please answer in English.";
+function getLanguageConfig(language: string) {
+  const normalized = language?.toLowerCase() as SupportedLanguage;
+  return LANGUAGE_CONFIG[normalized] ?? LANGUAGE_CONFIG.en;
+}
+
+function buildPrompt(languageConfig: (typeof LANGUAGE_CONFIG)[SupportedLanguage]) {
+  return [
+    "You are a venture strategist with exceptional divergent thinking skills.",
+    "Given a photo, you must extract the implicit, dominant business model shown in the image and generate five contrarian startup ideas that invert or subvert that model.",
+    "For each idea, you must produce the following fields: Idea Source, Business Strategy, Marketing Hook, Market Potential, Target Audience.",
+    "Each field must stay within 60 words, be specific, and highlight why the idea is contrarian to what the photo implies.",
+    languageConfig.instruction,
+  ].join(" ");
+}
+
+function buildSchema(descriptionNote: string) {
+  return {
+    name: "startup_ideas",
+    strict: true,
+    schema: {
+      type: "object",
+      properties: {
+        ideas: {
+          type: "array",
+          minItems: 5,
+          maxItems: 5,
+          description: "Exactly five contrarian startup idea kits derived from the photo.",
+          items: {
+            type: "object",
+            properties: {
+              source: {
+                type: "string",
+                description: `Idea Source: describe the insight or hidden tension spotted in the image. ${descriptionNote}`,
+              },
+              strategy: {
+                type: "string",
+                description: `Business Strategy: explain how the idea earns money and why it inverts the observed model. ${descriptionNote}`,
+              },
+              marketing: {
+                type: "string",
+                description: `Marketing Hook: deliver a punchy positioning or tagline tailored to the idea. ${descriptionNote}`,
+              },
+              market_potential: {
+                type: "string",
+                description: `Market Potential: summarize demand signals, trends, or underserved segments. ${descriptionNote}`,
+              },
+              target_audience: {
+                type: "string",
+                description: `Target Audience: describe the most receptive customer cohort with defining traits. ${descriptionNote}`,
+              },
+            },
+            required: [
+              "source",
+              "strategy",
+              "marketing",
+              "market_potential",
+              "target_audience",
+            ],
+            additionalProperties: false,
+          },
+        },
+      },
+      required: ["ideas"],
+      additionalProperties: false,
+    },
+  };
+}
+
+function parseResponseJson(response: OpenAIResponse) {
+  const textBlock = response.output
+    ?.flatMap((item) => item.content)
+    .find((part) => part.type === "output_text");
+
+  if (!textBlock || textBlock.type !== "output_text") {
+    throw new Error("OpenAI returned an empty response");
   }
+
+  return JSON.parse(textBlock.text);
 }
 
 export async function POST(request: NextRequest) {
@@ -46,91 +144,46 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-2024-11-20",
-      messages: [
+    const languageConfig = getLanguageConfig(language);
+
+    const completion = await openai.responses.create({
+      model: "gpt-4.1-mini",
+      input: [
         {
           role: "system",
-          content: `你具有非凡的商业发散思维，拥有丰富的想象力及敏锐的商业直觉，尤其擅长从现有人类的商业模式中挖掘出其对立的创新商业模式。现在请你仔细观察我提供的照片，从图片中已经存在的商业模式中，明确给出5个与之对立的创新商业模式。${getLanguagePrompt(
-            language
-          )}`,
+          content: [
+            {
+              type: "input_text",
+              text: buildPrompt(languageConfig),
+            },
+          ],
         },
         {
           role: "user",
-          content: [{ type: "image_url", image_url: { url: image_url } }],
+          content: [
+            {
+              type: "input_text",
+              text: "Generate five contrarian startup ideas that invert the business model implied by this photo. Fill every field from the schema.",
+            },
+            {
+              type: "input_image_url",
+              image_url: {
+                url: image_url,
+              },
+            },
+          ],
         },
       ],
       response_format: {
         type: "json_schema",
-        json_schema: {
-          name: "startup_ideas",
-          strict: true,
-          schema: {
-            type: "object",
-            properties: {
-              ideas: {
-                type: "array",
-                description:
-                  "A collection of unique startup ideas derived from photo details.",
-                items: {
-                  type: "object",
-                  properties: {
-                    source: {
-                      type: "string",
-                      description:
-                        "The source of inspiration for the startup idea.",
-                    },
-                    strategy: {
-                      type: "string",
-                      description:
-                        "The method or strategy to generate revenue from this idea with details but within 50 words",
-                    },
-                    marketing: {
-                      type: "string",
-                      description:
-                        "Marketing copy used to promote the idea with details but within 50 words.",
-                    },
-                    market_potential: {
-                      type: "string",
-                      description:
-                        "An overview of the potential market size and demand.",
-                    },
-                    target_audience: {
-                      type: "string",
-                      description:
-                        "The demographic or group of people the idea is aimed at.",
-                    },
-                  },
-                  required: [
-                    "source",
-                    "strategy",
-                    "marketing",
-                    "market_potential",
-                    "target_audience",
-                  ],
-                  additionalProperties: false,
-                },
-              },
-            },
-            required: ["ideas"],
-            additionalProperties: false,
-          },
-        },
+        json_schema: buildSchema(languageConfig.fieldNote),
       },
-      temperature: 1.4,
+      temperature: 1.2,
       top_p: 0.8,
-      max_completion_tokens: 2048,
-      frequency_penalty: 0,
-      presence_penalty: 0,
-      store: false,
+      max_output_tokens: 2048,
     });
 
-    const content = completion.choices[0]?.message?.content;
-    if (!content) {
-      throw new Error("OpenAI did not return any content");
-    }
-
-    const parsedContent = JSON.parse(content);
+    const parsedContent = parseResponseJson(completion);
     const validatedIdeas = IdeaSchema.array().parse(parsedContent.ideas);
 
     return NextResponse.json({ status: "success", ideas: validatedIdeas });
