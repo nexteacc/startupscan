@@ -118,6 +118,7 @@ function parseResponseJson(response: OpenAIResponse) {
   // 修复：增加类型守卫，确保只处理包含 content 的消息项
   const textBlock = response.output
     ?.flatMap((item) => {
+      // 检查 item 是否包含 content 属性 (这是 Responses API 中 Text Message 的特征)
       if ("content" in item && item.content) {
         return item.content;
       }
@@ -152,18 +153,12 @@ export async function POST(request: NextRequest) {
 
     const languageConfig = getLanguageConfig(language);
 
+    // 核心修复：适配 Responses API 的新参数结构
     const completion = await openai.responses.create({
-      model: "gpt-4.1-mini", // 确保此处模型名称与您的权限匹配
+      model: "gpt-4.1-mini", // 确保您有权访问此模型，否则请改回 gpt-4o
+      // 1. System Prompt 移至 'instructions'
+      instructions: buildPrompt(languageConfig),
       input: [
-        {
-          role: "system",
-          content: [
-            {
-              type: "input_text",
-              text: buildPrompt(languageConfig),
-            },
-          ],
-        },
         {
           role: "user",
           content: [
@@ -172,10 +167,9 @@ export async function POST(request: NextRequest) {
               text: "Generate five contrarian startup ideas that invert the business model implied by this photo. Fill every field from the schema.",
             },
             {
-              type: "input_image_url",
-              image_url: {
-                url: image_url,
-              },
+              // 2. 图片类型修正为 'input_image'，且 image_url 直接传字符串
+              type: "input_image",
+              image_url: image_url,
             },
           ],
         },
