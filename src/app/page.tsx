@@ -10,6 +10,7 @@ import {
 } from "@clerk/nextjs";
 import { AuroraBackground } from "@/components/AuroraBackground";
 import ResultsView from "@/components/ResultsView";
+import { CpuArchitecture } from "@/components/CpuArchitecture";
 
 interface Idea {
   source: string;
@@ -225,7 +226,9 @@ export default function HomePage() {
                   <div className="text-red-500 mb-4">{errorMessage}</div>
                 )}
                 {isLoading && (
-                  <div className="mb-4">Collecting inspiration, please wait...</div>
+                  <div className="w-full max-w-md h-64 flex items-center justify-center">
+                    <CpuArchitecture text="GPU" />
+                  </div>
                 )}
                 {!isLoading && (
                   <>
@@ -243,77 +246,79 @@ export default function HomePage() {
             </AuroraBackground>
 
             {/* PLAY按钮容器 - fixed定位，屏幕中间，位置不变 */}
-            <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
-              {/* 语言选择器 - absolute定位在PLAY左边，不占布局空间 */}
-              <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2">
-                <div className="relative w-20 h-12">
-                  <div className="absolute inset-0 pointer-events-none flex flex-row items-center justify-center gap-2 rounded-2xl bg-gray-200 border border-gray-200 text-gray-900 shadow-sm">
-                    <span className="text-lg leading-none">{currentLang.flag}</span>
-                    <span className="text-sm font-bold leading-none tracking-wide">{currentLang.short}</span>
+            {!isLoading && (
+              <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
+                {/* 语言选择器 - absolute定位在PLAY左边，不占布局空间 */}
+                <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2">
+                  <div className="relative w-20 h-12">
+                    <div className="absolute inset-0 pointer-events-none flex flex-row items-center justify-center gap-2 rounded-2xl bg-gray-200 border border-gray-200 text-gray-900 shadow-sm">
+                      <span className="text-lg leading-none">{currentLang.flag}</span>
+                      <span className="text-sm font-bold leading-none tracking-wide">{currentLang.short}</span>
+                    </div>
+                    <select
+                      value={language}
+                      onChange={(e) => setLanguage(e.target.value)}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none"
+                    >
+                      {LANGUAGES.map((lang) => (
+                        <option key={lang.code} value={lang.code} className="text-gray-900">
+                          {lang.flag} {lang.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none"
-                  >
-                    {LANGUAGES.map((lang) => (
-                      <option key={lang.code} value={lang.code} className="text-gray-900">
-                        {lang.flag} {lang.label}
-                      </option>
-                    ))}
-                  </select>
                 </div>
-              </div>
 
-              {/* PLAY按钮 */}
-              <button
-                onClick={handleCameraClick}
-                className="flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-600 rounded-2xl shadow-lg min-w-[140px]"
-              >
-                {isMobile ? (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
-                      />
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
-                      />
-                    </svg>
-                    PLAY
-                  </>
-                ) : (
-                  <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-6 h-6"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
-                      />
-                    </svg>
-                    Upload
-                  </>
-                )}
-              </button>
-            </div>
+                {/* PLAY按钮 */}
+                <button
+                  onClick={handleCameraClick}
+                  className="flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-600 rounded-2xl shadow-lg min-w-[140px]"
+                >
+                  {isMobile ? (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+                        />
+                      </svg>
+                      PLAY
+                    </>
+                  ) : (
+                    <>
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
+                        />
+                      </svg>
+                      Upload
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
 
             {/* Sign Out按钮 - fixed定位，参考系是屏幕 */}
             <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
