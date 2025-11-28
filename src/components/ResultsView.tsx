@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 interface Idea {
   source: string;
@@ -21,6 +22,16 @@ interface ResultsViewProps {
 
 const CARD_OFFSET = 60;
 const SCALE_FACTOR = 0.03;
+
+// 图标配置
+const ICONS = {
+  ideaKit: "/icons/idea-kit.png",
+  ideaSource: "/icons/idea-source.png",
+  marketPotential: "/icons/market-potential.png",
+  strategy: "/icons/strategy.png",
+  marketing: "/icons/marketing.png",
+  targetAudience: "/icons/target-audience.png",
+};
 
 const ResultsView: React.FC<ResultsViewProps> = ({
   ideas,
@@ -128,7 +139,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                   }}
                 >
                   <div className={`p-5 ${isExpanded ? 'pb-8' : ''}`}> 
-                    <div className="text-center mb-4">
+                    <div className="flex items-center justify-center gap-2 mb-4">
+                      <Image src={ICONS.ideaKit} alt="Idea Kit" width={24} height={24} />
                       <h2 className="text-lg font-semibold text-gray-900">
                         Idea Kit {index + 1}
                       </h2>
@@ -137,13 +149,19 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                     {!isExpanded && (
                       <div className="space-y-3">
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-600 text-xs mb-1">Idea Source</h3>
+                          <h3 className="flex items-center gap-1.5 font-medium text-blue-600 text-xs mb-1">
+                            <Image src={ICONS.ideaSource} alt="" width={16} height={16} />
+                            Idea Source
+                          </h3>
                           <p className="text-gray-700 text-xs leading-snug line-clamp-2">
                             {idea.source}
                           </p>
                         </div>
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-600 text-xs mb-1">Market Potential</h3>
+                          <h3 className="flex items-center gap-1.5 font-medium text-blue-600 text-xs mb-1">
+                            <Image src={ICONS.marketPotential} alt="" width={16} height={16} />
+                            Market Potential
+                          </h3>
                           <p className="text-gray-700 text-xs leading-snug line-clamp-2">
                             {idea.market_potential}
                           </p>
@@ -159,31 +177,46 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                         className="space-y-3"
                       >
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-600 text-sm mb-1">Idea Source</h3>
+                          <h3 className="flex items-center gap-2 font-medium text-blue-600 text-sm mb-1">
+                            <Image src={ICONS.ideaSource} alt="" width={20} height={20} />
+                            Idea Source
+                          </h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.source}
                           </p>
                         </div>
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-600 text-sm mb-1">Market Potential</h3>
+                          <h3 className="flex items-center gap-2 font-medium text-blue-600 text-sm mb-1">
+                            <Image src={ICONS.marketPotential} alt="" width={20} height={20} />
+                            Market Potential
+                          </h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.market_potential}
                           </p>
                         </div>
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-600 text-sm mb-1">Strategy</h3>
+                          <h3 className="flex items-center gap-2 font-medium text-blue-600 text-sm mb-1">
+                            <Image src={ICONS.strategy} alt="" width={20} height={20} />
+                            Strategy
+                          </h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.strategy}
                           </p>
                         </div>
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-600 text-sm mb-1">Marketing</h3>
+                          <h3 className="flex items-center gap-2 font-medium text-blue-600 text-sm mb-1">
+                            <Image src={ICONS.marketing} alt="" width={20} height={20} />
+                            Marketing
+                          </h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.marketing}
                           </p>
                         </div>
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-600 text-sm mb-1">Target Audience</h3>
+                          <h3 className="flex items-center gap-2 font-medium text-blue-600 text-sm mb-1">
+                            <Image src={ICONS.targetAudience} alt="" width={20} height={20} />
+                            Target Audience
+                          </h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.target_audience}
                           </p>

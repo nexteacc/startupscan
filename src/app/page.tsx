@@ -226,33 +226,34 @@ export default function HomePage() {
                       onChange={handleFileChange}
                       className="hidden"
                     />
-                    <div className="flex items-center gap-3 relative z-20">
-                      {/* Native Select with Custom Overlay */}
-                      <div className="relative shrink-0 w-16 h-12">
-                        {/* The Visual Layer (What user sees) */}
-                        <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-gray-200 border border-gray-200 text-gray-900">
-                          <span className="text-lg leading-none">{currentLang.flag}</span>
-                          <span className="text-[10px] font-bold leading-none tracking-wider">{currentLang.short}</span>
+                    <div className="flex flex-col items-center gap-4 relative z-20">
+                      <div className="flex items-center gap-3">
+                        {/* Native Select with Custom Overlay */}
+                        <div className="relative shrink-0 w-16 h-12">
+                          {/* The Visual Layer (What user sees) */}
+                          <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-gray-200 border border-gray-200 text-gray-900">
+                            <span className="text-lg leading-none">{currentLang.flag}</span>
+                            <span className="text-[10px] font-bold leading-none tracking-wider">{currentLang.short}</span>
+                          </div>
+                          
+                          {/* The Functional Layer (Native Select, invisible but clickable) */}
+                          <select
+                            value={language}
+                            onChange={(e) => setLanguage(e.target.value)}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none"
+                          >
+                            {LANGUAGES.map((lang) => (
+                              <option key={lang.code} value={lang.code} className="text-gray-900">
+                                {lang.flag} {lang.label}
+                              </option>
+                            ))}
+                          </select>
                         </div>
-                        
-                        {/* The Functional Layer (Native Select, invisible but clickable) */}
-                        <select
-                          value={language}
-                          onChange={(e) => setLanguage(e.target.value)}
-                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none"
-                        >
-                          {LANGUAGES.map((lang) => (
-                            <option key={lang.code} value={lang.code} className="text-gray-900">
-                              {lang.flag} {lang.label}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
 
-                      <button
-                        onClick={handleCameraClick}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-600 rounded-2xl shadow-lg min-w-[140px]"
-                      >
+                        <button
+                          onClick={handleCameraClick}
+                          className="flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-600 rounded-2xl shadow-lg min-w-[140px]"
+                        >
                       {isMobile ? (
                         <>
                           <svg
@@ -294,36 +295,36 @@ export default function HomePage() {
                           </svg>
                           上传图片
                         </>
-                      )}
+                        )}
+                        </button>
+                      </div>
+
+                      <button onClick={() => signOut()} className="logout-button">
+                        <div className="svg-wrapper-1">
+                          <div className="svg-wrapper">
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              strokeWidth={1.5}
+                              stroke="currentColor"
+                              className="w-5 h-5"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                        <span>Sign Out</span>
                       </button>
                     </div>
                   </>
                 )}
               </div>
             </AuroraBackground>
-            <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50">
-              <button onClick={() => signOut()} className="logout-button">
-                <div className="svg-wrapper-1">
-                  <div className="svg-wrapper">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={1.5}
-                      stroke="currentColor"
-                      className="w-5 h-5"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15M12 9l-3 3m0 0l3 3m-3-3h12.75"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <span>Sign Out</span>
-              </button>
-            </div>
           </div>
         )}
       </SignedIn>
