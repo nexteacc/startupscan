@@ -48,7 +48,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   return (
     <div 
       ref={scrollRef}
-      className="min-h-screen h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col pt-8 overflow-y-auto relative"
+      className="min-h-screen h-[100dvh] bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col pt-8 overflow-y-auto relative"
     >
 
 
@@ -199,7 +199,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
         </div>
       </div>
 
-      <div className="px-6 pb-8 pt-4 flex flex-col items-center gap-4">
+      <div className="px-6 pb-24 pt-4 flex flex-col items-center gap-4 shrink-0">
         {errorMessage && (
           <div className="text-red-500 text-sm text-center max-w-md">
             {errorMessage}
