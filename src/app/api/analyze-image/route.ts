@@ -15,56 +15,26 @@ const ResponseSchema = z.object({
   ideas: z.array(IdeaSchema).min(5).max(5).describe("Exactly five contrarian startup idea kits derived from the photo."),
 });
 
-// 2. 多语言配置
-const LANGUAGE_CONFIG = {
-  en: {
-    code: "en",
-    instruction:
-      "Respond in professional English only. Do not use any other language, emoji, or transliteration.",
-    fieldNote:
-      "Write concise English sentences (max 60 words) highlighting contrarian insights.",
-  },
-  zh: {
-    code: "zh",
-    instruction:
-      "所有输出字段必须使用简体中文，不要包含任何英文、拼音或其他语言。",
-    fieldNote: "使用简洁清晰的中文叙述，每个字段不超过 60 个字。",
-  },
-  fr: {
-    code: "fr",
-    instruction:
-      "Répondez uniquement en français naturel, sans mots anglais ni emoji.",
-    fieldNote:
-      "Rédigez des phrases concises en français (maximum 60 mots) en mettant l'accent sur l'approche contrarienne.",
-  },
-  ja: {
-    code: "ja",
-    instruction:
-      "出力はすべて自然な日本語で記述し、英語や絵文字は使用しないでください。",
-    fieldNote: "各フィールドは 60 語以内で、対極的な視点を強調してください。",
-  },
-} as const;
-
-type SupportedLanguage = keyof typeof LANGUAGE_CONFIG;
+// 2. 语言名称映射
+const LANGUAGE_NAMES: Record<string, string> = {
+  en: "English",
+  zh: "Simplified Chinese",
+  fr: "French",
+  ja: "Japanese",
+};
 
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-function getLanguageConfig(language: string) {
-  const normalized = language?.toLowerCase() as SupportedLanguage;
-  return LANGUAGE_CONFIG[normalized] ?? LANGUAGE_CONFIG.en;
-}
-
-function buildSystemPrompt(
-  languageConfig: (typeof LANGUAGE_CONFIG)[SupportedLanguage]
-) {
+function buildSystemPrompt(languageCode: string) {
+  const languageName = LANGUAGE_NAMES[languageCode] || "English";
   return [
     "You are a venture strategist with exceptional divergent thinking skills.",
     "Given a photo, you must extract the implicit, dominant business model shown in the image and generate five contrarian startup ideas that invert or subvert that model.",
     "For each idea, you must produce the following fields: Idea Source, Business Strategy, Marketing Hook, Market Potential, Target Audience.",
-    `Each field must stay within 60 words, be specific, and highlight why the idea is contrarian to what the photo implies. ${languageConfig.fieldNote}`,
-    languageConfig.instruction,
+    "Each field must stay within 60 words, be specific, and highlight why the idea is contrarian to what the photo implies.",
+    `Respond in ${languageName} ONLY.`,
   ].join(" ");
 }
 
@@ -86,12 +56,10 @@ export async function POST(request: Request) {
       });
     }
 
-    const languageConfig = getLanguageConfig(language);
-
     const result = await streamObject({
-      model: openai("gpt-4o-mini"),
+      model: openai("gpt-4o"),
       schema: ResponseSchema,
-      system: buildSystemPrompt(languageConfig),
+      system: buildSystemPrompt(language),
       messages: [
         {
           role: "user",

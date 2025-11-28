@@ -54,7 +54,7 @@ export default function HomePage() {
   }, []);
 
   const analyzeIdeas = useCallback(
-    async (imageUrl: string) => {
+    async (imageUrl: string, lang: string) => {
       const response = await fetch("/api/analyze-image", {
         method: "POST",
         headers: {
@@ -63,7 +63,7 @@ export default function HomePage() {
         body: JSON.stringify({
           userId: user?.id ?? "defaultUserId",
           image_url: imageUrl,
-          language: language,
+          language: lang,
         }),
       });
 
@@ -111,7 +111,7 @@ export default function HomePage() {
         }
       }
     },
-    [user?.id, language]
+    [user?.id]
   );
 
   const handleFileChange = useCallback(
@@ -155,7 +155,7 @@ export default function HomePage() {
         setLastImageUrl(imageUrl);
         setShowResults(true);
 
-        await analyzeIdeas(imageUrl);
+        await analyzeIdeas(imageUrl, language);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : "Unknown error");
         setShowResults(true);
@@ -166,7 +166,7 @@ export default function HomePage() {
         }
       }
     },
-    [analyzeIdeas, user?.id]
+    [analyzeIdeas, user?.id, language]
   );
 
   const handleRetry = useCallback(async () => {
@@ -175,13 +175,13 @@ export default function HomePage() {
       setIsLoading(true);
       setErrorMessage("");
       setIdeas([]);
-      await analyzeIdeas(lastImageUrl);
+      await analyzeIdeas(lastImageUrl, language);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unknown error");
     } finally {
       setIsLoading(false);
     }
-  }, [analyzeIdeas, lastImageUrl]);
+  }, [analyzeIdeas, lastImageUrl, language]);
 
   const handleCameraClick = () => {
     fileInputRef.current?.click();
@@ -235,10 +235,10 @@ export default function HomePage() {
             <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50">
               {/* 语言选择器 - absolute定位在PLAY左边，不占布局空间 */}
               <div className="absolute right-full mr-3 top-1/2 -translate-y-1/2">
-                <div className="relative w-16 h-12">
-                  <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-gray-200 border border-gray-200 text-gray-900">
+                <div className="relative w-20 h-12">
+                  <div className="absolute inset-0 pointer-events-none flex flex-row items-center justify-center gap-2 rounded-2xl bg-gray-200 border border-gray-200 text-gray-900 shadow-sm">
                     <span className="text-lg leading-none">{currentLang.flag}</span>
-                    <span className="text-[10px] font-bold leading-none tracking-wider">{currentLang.short}</span>
+                    <span className="text-sm font-bold leading-none tracking-wide">{currentLang.short}</span>
                   </div>
                   <select
                     value={language}
@@ -298,7 +298,7 @@ export default function HomePage() {
                         d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"
                       />
                     </svg>
-                    上传图片
+                    Upload
                   </>
                 )}
               </button>
