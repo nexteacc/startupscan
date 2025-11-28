@@ -1,15 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import OpenAI from "openai";
-import type { Response as OpenAIResponse } from "openai/resources/responses/responses";
+import { streamObject } from "ai";
+import { createOpenAI } from "@ai-sdk/openai";
 import { z } from "zod";
 
-// 1. 定义 Zod Schema（用于二次校验响应）
+// 1. 定义 Zod Schema
 const IdeaSchema = z.object({
-  source: z.string().default("Discovering"),
-  strategy: z.string().default("Collecting more inspiration..."),
-  marketing: z.string().default("Try again later"),
-  market_potential: z.string().default("Unknown"),
-  target_audience: z.string().default("Unknown"),
+  source: z.string().describe("Idea Source: describe the insight or hidden tension spotted in the image."),
+  strategy: z.string().describe("Business Strategy: explain how the idea earns money and why it inverts the observed model."),
+  marketing: z.string().describe("Marketing Hook: deliver a punchy positioning or tagline tailored to the idea."),
+  market_potential: z.string().describe("Market Potential: summarize demand signals, trends, or underserved segments."),
+  target_audience: z.string().describe("Target Audience: describe the most receptive customer cohort with defining traits."),
+});
+
+const ResponseSchema = z.object({
+  ideas: z.array(IdeaSchema).min(5).max(5).describe("Exactly five contrarian startup idea kits derived from the photo."),
 });
 
 // 2. 多语言配置
@@ -44,7 +47,7 @@ const LANGUAGE_CONFIG = {
 
 type SupportedLanguage = keyof typeof LANGUAGE_CONFIG;
 
-const openai = new OpenAI({
+const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
@@ -53,161 +56,59 @@ function getLanguageConfig(language: string) {
   return LANGUAGE_CONFIG[normalized] ?? LANGUAGE_CONFIG.en;
 }
 
-function buildPrompt(
+function buildSystemPrompt(
   languageConfig: (typeof LANGUAGE_CONFIG)[SupportedLanguage]
 ) {
   return [
     "You are a venture strategist with exceptional divergent thinking skills.",
     "Given a photo, you must extract the implicit, dominant business model shown in the image and generate five contrarian startup ideas that invert or subvert that model.",
     "For each idea, you must produce the following fields: Idea Source, Business Strategy, Marketing Hook, Market Potential, Target Audience.",
-    "Each field must stay within 60 words, be specific, and highlight why the idea is contrarian to what the photo implies.",
+    `Each field must stay within 60 words, be specific, and highlight why the idea is contrarian to what the photo implies. ${languageConfig.fieldNote}`,
     languageConfig.instruction,
   ].join(" ");
 }
 
-// 这里的返回结构专门给 text.format 使用
-function buildSchema(descriptionNote: string) {
-  return {
-    name: "startup_ideas",
-    strict: true,
-    schema: {
-      type: "object",
-      properties: {
-        ideas: {
-          type: "array",
-          minItems: 5,
-          maxItems: 5,
-          description:
-            "Exactly five contrarian startup idea kits derived from the photo.",
-          items: {
-            type: "object",
-            properties: {
-              source: {
-                type: "string",
-                description: `Idea Source: describe the insight or hidden tension spotted in the image. ${descriptionNote}`,
-              },
-              strategy: {
-                type: "string",
-                description: `Business Strategy: explain how the idea earns money and why it inverts the observed model. ${descriptionNote}`,
-              },
-              marketing: {
-                type: "string",
-                description: `Marketing Hook: deliver a punchy positioning or tagline tailored to the idea. ${descriptionNote}`,
-              },
-              market_potential: {
-                type: "string",
-                description: `Market Potential: summarize demand signals, trends, or underserved segments. ${descriptionNote}`,
-              },
-              target_audience: {
-                type: "string",
-                description: `Target Audience: describe the most receptive customer cohort with defining traits. ${descriptionNote}`,
-              },
-            },
-            required: [
-              "source",
-              "strategy",
-              "marketing",
-              "market_potential",
-              "target_audience",
-            ],
-            additionalProperties: false,
-          },
-        },
-      },
-      required: ["ideas"],
-      additionalProperties: false,
-    },
-  };
-}
-
-// 3. 解析 Responses API 返回（Structured Outputs 情况）
-function parseResponseJson(response: OpenAIResponse) {
-  const textBlock = response.output
-    ?.flatMap((item) => {
-      if (item.type === "message" && item.content) {
-        return item.content;
-      }
-      return [];
-    })
-    .find((part) => part.type === "output_text");
-
-  if (!textBlock || textBlock.type !== "output_text") {
-    throw new Error("OpenAI returned an empty response");
-  }
-
-  return JSON.parse(textBlock.text);
-}
-
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   if (!process.env.OPENAI_API_KEY) {
-    return NextResponse.json(
-      { status: "error", error: "OPENAI_API_KEY is not configured" },
-      { status: 500 }
-    );
+    return new Response("OPENAI_API_KEY is not configured", { status: 500 });
   }
 
   try {
     const { userId, image_url, language = "en" } = await request.json();
 
     if (!userId || !image_url) {
-      return NextResponse.json(
-        { status: "error", error: "userId and image_url are required" },
-        { status: 400 }
-      );
+      return new Response("userId and image_url are required", { status: 400 });
     }
 
     const languageConfig = getLanguageConfig(language);
 
-    const completion = await openai.responses.create({
-      model: "gpt-4o-mini", // 支持多模态与 Structured Outputs 的模型
-
-      // 系统指令放在 instructions
-      instructions: buildPrompt(languageConfig),
-
-      // 用户输入：文字 + 图片（多模态）
-      input: [
+    const result = await streamObject({
+      model: openai("gpt-4o-mini"),
+      schema: ResponseSchema,
+      system: buildSystemPrompt(languageConfig),
+      messages: [
         {
           role: "user",
           content: [
             {
-              type: "input_text",
-              text: "Generate five contrarian startup ideas that invert the business model implied by this photo. Fill every field from the schema.",
+              type: "text",
+              text: "Generate five contrarian startup ideas that invert the business model implied by this photo.",
             },
             {
-              type: "input_image",
-              image_url: image_url, // 直接传字符串 URL
-              detail: "auto", // 可选字段，auto/low/high
+              type: "image",
+              image: image_url,
             },
           ],
         },
       ],
-
-      // 使用 Structured Outputs 的 text.format + json_schema
-      text: {
-        format: {
-          type: "json_schema",
-          ...buildSchema(languageConfig.fieldNote),
-        },
-      },
-
       temperature: 1.2,
-      top_p: 0.8,
-      max_output_tokens: 2048,
     });
 
-    const parsedContent = parseResponseJson(completion);
-
-    // 用 Zod 再做一层类型/默认值校验
-    const validatedIdeas = IdeaSchema.array().parse(parsedContent.ideas);
-
-    return NextResponse.json({ status: "success", ideas: validatedIdeas });
+    return result.toTextStreamResponse();
   } catch (error) {
     console.error("Analyze image failed:", error);
-    return NextResponse.json(
-      {
-        status: "error",
-        error: error instanceof Error ? error.message : "Unknown error",
-      },
+    return new Response(
+      error instanceof Error ? error.message : "Unknown error",
       { status: 500 }
     );
   }

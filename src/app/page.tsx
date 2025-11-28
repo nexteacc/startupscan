@@ -49,16 +49,46 @@ export default function HomePage() {
         throw new Error("Analysis failed");
       }
 
-      const data = await response.json();
-      setIdeas(
-        data.ideas.map((idea: Idea) => ({
-          source: idea.source.trim(),
-          strategy: idea.strategy.trim(),
-          marketing: idea.marketing.trim(),
-          market_potential: idea.market_potential.trim(),
-          target_audience: idea.target_audience.trim(),
-        }))
-      );
+      if (!response.body) {
+        throw new Error("No response body");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // Try to parse the latest complete object
+        const lines = buffer.split("\n");
+        for (let i = 0; i < lines.length - 1; i++) {
+          const line = lines[i].trim();
+          if (line.startsWith("0:")) {
+            try {
+              const jsonStr = line.substring(2);
+              const parsed = JSON.parse(jsonStr);
+              if (parsed.ideas && Array.isArray(parsed.ideas)) {
+                setIdeas(
+                  parsed.ideas.map((idea: Idea) => ({
+                    source: idea.source?.trim() || "",
+                    strategy: idea.strategy?.trim() || "",
+                    marketing: idea.marketing?.trim() || "",
+                    market_potential: idea.market_potential?.trim() || "",
+                    target_audience: idea.target_audience?.trim() || "",
+                  }))
+                );
+              }
+            } catch (e) {
+              // Ignore parse errors for incomplete JSON
+            }
+          }
+        }
+        buffer = lines[lines.length - 1];
+      }
     },
     [user?.id]
   );
@@ -71,6 +101,7 @@ export default function HomePage() {
       try {
         setIsLoading(true);
         setErrorMessage("");
+        setIdeas([]);
 
         if (!user?.id) {
           throw new Error("User ID is missing");
@@ -80,7 +111,7 @@ export default function HomePage() {
           throw new Error("Cloudinary is not configured");
         }
 
-        // 直接上传文件到 Cloudinary
+        // Upload to Cloudinary
         const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
         const formData = new FormData();
         formData.append("file", file);
@@ -101,15 +132,14 @@ export default function HomePage() {
           "/upload/w_800,q_auto/"
         );
         setLastImageUrl(imageUrl);
+        setShowResults(true);
 
         await analyzeIdeas(imageUrl);
-        setShowResults(true);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : "Unknown error");
         setShowResults(true);
       } finally {
         setIsLoading(false);
-        // 重置 input，允许重复选择同一文件
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
@@ -123,6 +153,7 @@ export default function HomePage() {
     try {
       setIsLoading(true);
       setErrorMessage("");
+      setIdeas([]);
       await analyzeIdeas(lastImageUrl);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unknown error");
@@ -151,7 +182,6 @@ export default function HomePage() {
               setIdeas([]);
               setErrorMessage("");
               setShowResults(false);
-              // 延迟触发文件选择，让 UI 先更新
               setTimeout(() => fileInputRef.current?.click(), 100);
             }}
           />
@@ -167,7 +197,6 @@ export default function HomePage() {
                 )}
                 {!isLoading && (
                   <>
-                    {/* 隐藏的 input，使用系统相机 */}
                     <input
                       ref={fileInputRef}
                       type="file"

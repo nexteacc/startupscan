@@ -9,7 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@ai-sdk/openai": "^2.0.74",
     "@clerk/nextjs": "^6.0.0",
+    "ai": "^5.0.104",
     "clsx": "^2.1.1",
     "creem": "^0.3.37",
     "framer-motion": "^12.12.2",
@@ -20,7 +22,7 @@
     "react-webcam": "^7.2.0",
     "styled-components": "^6.1.17",
     "tailwind-merge": "^3.0.2",
-    "zod": "^3.24.2"
+    "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/node": "^20",
