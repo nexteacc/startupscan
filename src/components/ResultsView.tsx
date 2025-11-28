@@ -253,10 +253,9 @@ const ResultsView: React.FC<ResultsViewProps> = ({
               }}
               transition={{ duration: 0.3 }}
             >
-              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 h-[180px] flex flex-col items-center justify-center gap-3">
-                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 h-[180px] flex items-center justify-center">
                 <TextShimmer
-                  className="font-medium text-sm [--base-color:theme(colors.gray.400)] [--base-gradient-color:theme(colors.blue.500)]"
+                  className="font-medium text-sm"
                   duration={1.5}
                 >
                   Generating Idea {displayIdeas.length + 1}...
