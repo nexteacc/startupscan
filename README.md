@@ -6,7 +6,7 @@
 - **前端**：Next.js 16（App Router）、React 19、Tailwind CSS、Framer Motion、Styled Components
 - **认证**：@clerk/nextjs
 - **媒体与上传**：navigator.mediaDevices、react-webcam（CameraView）、Cloudinary 上传 API
-- **AI**：OpenAI SDK（`gpt-4o-2024-11-20`）+ JSON schema 约束
+- **AI**：OpenAI SDK（`gpt-4o-mini`）+ Structured Outputs (JSON schema)
 - **支付**：Creem checkout（`/api/create-checkout-session`）
 
 ### 目录结构
