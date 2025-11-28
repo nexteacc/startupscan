@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { TextShimmer } from "@/components/TextShimmer";
 
 interface Idea {
   source: string;
@@ -254,9 +255,12 @@ const ResultsView: React.FC<ResultsViewProps> = ({
             >
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 h-[180px] flex flex-col items-center justify-center gap-3">
                 <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-gray-500 font-medium text-sm animate-pulse">
+                <TextShimmer
+                  className="font-medium text-sm [--base-color:theme(colors.gray.400)] [--base-gradient-color:theme(colors.blue.500)]"
+                  duration={1.5}
+                >
                   Generating Idea {displayIdeas.length + 1}...
-                </p>
+                </TextShimmer>
               </div>
             </motion.div>
           )}
@@ -269,30 +273,30 @@ const ResultsView: React.FC<ResultsViewProps> = ({
             {errorMessage}
           </div>
         )}
+        {onRetry && (
+          <button
+            onClick={onRetry}
+            className="w-full py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-900 rounded-3xl text-base font-medium transition-colors mb-2"
+          >
+            Retry Analysis
+          </button>
+        )}
         <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
           {onBack && (
             <button
               onClick={onBack}
-              className="w-full py-3 px-4 rounded-3xl border-2 border-gray-200 text-gray-700 text-base font-medium bg-white shadow"
+              className="w-full py-3 px-4 rounded-3xl border-2 border-gray-200 text-gray-700 text-base font-medium bg-white shadow hover:bg-gray-50 transition-colors"
             >
               Back Home
             </button>
           )}
           <button
             onClick={onRetake}
-            className="w-full py-3 px-4 bg-blue-600 text-white rounded-3xl text-base font-medium shadow"
+            className="w-full py-3 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-3xl text-base font-medium shadow transition-colors"
           >
             Retake Photo
           </button>
         </div>
-        {onRetry && (
-          <button
-            onClick={onRetry}
-            className="text-sm text-blue-600 underline underline-offset-4"
-          >
-            Retry Analysis
-          </button>
-        )}
       </div>
     </div>
   );

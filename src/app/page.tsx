@@ -226,7 +226,7 @@ export default function HomePage() {
                   <div className="text-red-500 mb-4">{errorMessage}</div>
                 )}
                 {isLoading && (
-                  <div className="w-full max-w-md h-64 flex items-center justify-center">
+                  <div className="w-full max-w-md h-48 md:h-64 flex items-center justify-center">
                     <CpuArchitecture text="GPU" />
                   </div>
                 )}
