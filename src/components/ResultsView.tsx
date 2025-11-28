@@ -57,7 +57,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   };
 
   return (
-    <div 
+    <div
       ref={scrollRef}
       className="min-h-screen h-[100dvh] bg-gray-100 flex flex-col pt-8 overflow-y-auto relative"
     >
@@ -77,8 +77,8 @@ const ResultsView: React.FC<ResultsViewProps> = ({
             onClick={handleBackgroundClick}
           />
         )}
-        
-        <div className="relative w-full max-w-md" style={{ height: `${displayIdeas.length * 60 + 200}px` }}> 
+
+        <div className="relative w-full max-w-md" style={{ height: `${displayIdeas.length * 60 + 200}px` }}>
           {displayIdeas.map((idea, index) => {
             const isExpanded = expandedIndex === index;
             let displayOrder = displayIdeas.length - 1 - index;
@@ -86,7 +86,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
               if (index === expandedIndex) {
                 displayOrder = displayIdeas.length;
               } else if (index > expandedIndex) {
-                displayOrder = displayIdeas.length - 1 - index + 1; 
+                displayOrder = displayIdeas.length - 1 - index + 1;
               } else {
                 displayOrder = displayIdeas.length - 1 - index;
               }
@@ -107,13 +107,13 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                 initial={{
                   y: initialYOffset,
                   scale: initialScale,
-                  opacity: 1,
+                  opacity: 0,
                 }}
                 animate={{
                   y: isExpanded
                     ? viewportOffset
                     : initialYOffset +
-                      (expandedIndex !== null && index > expandedIndex ? 150 : 0),
+                    (expandedIndex !== null && index > expandedIndex ? 150 : 0),
                   scale: isExpanded ? 1 : initialScale,
                   opacity: isExpanded ? 1 : (expandedIndex !== null && index !== expandedIndex ? 0.7 : 1),
                   rotateX: 0,
@@ -138,7 +138,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                     damping: 30
                   }}
                 >
-                  <div className={`p-5 ${isExpanded ? 'pb-8' : ''}`}> 
+                  <div className={`p-5 ${isExpanded ? 'pb-8' : ''}`}>
                     <div className="flex items-center justify-center gap-2 mb-4">
                       <Image src={ICONS.ideaKit} alt="Idea Kit" width={24} height={24} />
                       <h2 className="text-lg font-semibold text-gray-900">

@@ -34,6 +34,8 @@ export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [language, setLanguage] = useState("en");
 
+  const [isStreamFinished, setIsStreamFinished] = useState(false);
+
   const LANGUAGES = [
     { code: "en", label: "English", flag: "🇺🇸", short: "EN" },
     { code: "zh", label: "中文", flag: "🇨🇳", short: "ZH" },
@@ -55,6 +57,7 @@ export default function HomePage() {
 
   const analyzeIdeas = useCallback(
     async (imageUrl: string, lang: string) => {
+      setIsStreamFinished(false);
       const response = await fetch("/api/analyze-image", {
         method: "POST",
         headers: {
@@ -110,6 +113,7 @@ export default function HomePage() {
           }
         }
       }
+      setIsStreamFinished(true);
     },
     [user?.id]
   );
@@ -123,6 +127,7 @@ export default function HomePage() {
         setIsLoading(true);
         setErrorMessage("");
         setIdeas([]);
+        setIsStreamFinished(false);
 
         if (!user?.id) {
           throw new Error("User ID is missing");
@@ -175,6 +180,7 @@ export default function HomePage() {
       setIsLoading(true);
       setErrorMessage("");
       setIdeas([]);
+      setIsStreamFinished(false);
       await analyzeIdeas(lastImageUrl, language);
     } catch (error) {
       setErrorMessage(error instanceof Error ? error.message : "Unknown error");
@@ -187,20 +193,24 @@ export default function HomePage() {
     fileInputRef.current?.click();
   };
 
+  const visibleIdeas = isStreamFinished ? ideas : ideas.slice(0, Math.max(0, ideas.length - 1));
+
   return (
     <>
       <SignedIn>
         {showResults ? (
           <ResultsView
-            ideas={ideas}
+            ideas={visibleIdeas}
             errorMessage={errorMessage}
             onRetry={handleRetry}
             onBack={() => {
               setIdeas([]);
+              setIsStreamFinished(false);
               setShowResults(false);
             }}
             onRetake={() => {
               setIdeas([]);
+              setIsStreamFinished(false);
               setErrorMessage("");
               setShowResults(false);
               setTimeout(() => fileInputRef.current?.click(), 100);
