@@ -96,7 +96,10 @@ export default function HomePage() {
           throw new Error(responseJson.message || "Image upload failed");
         }
 
-        const imageUrl = responseJson.secure_url;
+        const imageUrl = responseJson.secure_url.replace(
+          "/upload/",
+          "/upload/w_800,q_auto/"
+        );
         setLastImageUrl(imageUrl);
 
         await analyzeIdeas(imageUrl);
