@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import {
   SignIn,
   SignedIn,
@@ -9,8 +9,6 @@ import {
   useUser,
 } from "@clerk/nextjs";
 import { AuroraBackground } from "@/components/AuroraBackground";
-import { CameraButton } from "@/components/CameraButton";
-import { CameraView } from "@/components/CameraView";
 import ResultsView from "@/components/ResultsView";
 
 interface Idea {
@@ -21,28 +19,18 @@ interface Idea {
   target_audience: string;
 }
 
-type CameraState = "idle" | "active" | "results";
-
 const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
 const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET;
 
 export default function HomePage() {
   const { signOut } = useClerk();
   const { user } = useUser();
-  const [cameraState, setCameraState] = useState<CameraState>("idle");
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [ideas, setIdeas] = useState<Idea[]>([]);
   const [errorMessage, setErrorMessage] = useState("");
-  const [mediaStream, setMediaStream] = useState<MediaStream | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [lastImageUrl, setLastImageUrl] = useState<string | null>(null);
-
-  const handleExit = useCallback(() => {
-    setCameraState("idle");
-    if (mediaStream) {
-      mediaStream.getTracks().forEach((track) => track.stop());
-      setMediaStream(null);
-    }
-  }, [mediaStream]);
+  const [showResults, setShowResults] = useState(false);
 
   const analyzeIdeas = useCallback(
     async (imageUrl: string) => {
@@ -75,37 +63,27 @@ export default function HomePage() {
     [user?.id]
   );
 
-  const handleCapture = useCallback(
-    async (image: string) => {
+  const handleFileChange = useCallback(
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
       try {
         setIsLoading(true);
         setErrorMessage("");
 
-        if (mediaStream) {
-          mediaStream.getTracks().forEach((track) => track.stop());
-          setMediaStream(null);
-        }
-
         if (!user?.id) {
           throw new Error("User ID is missing");
-        }
-
-        if (!image || image.length < 100) {
-          throw new Error("Invalid image data");
-        }
-
-        const base64Data = image.split(",")[1];
-        if (!base64Data) {
-          throw new Error("Invalid Base64 image data");
         }
 
         if (!cloudName || !uploadPreset) {
           throw new Error("Cloudinary is not configured");
         }
 
+        // 直接上传文件到 Cloudinary
         const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`;
         const formData = new FormData();
-        formData.append("file", `data:image/png;base64,${base64Data}`);
+        formData.append("file", file);
         formData.append("upload_preset", uploadPreset);
 
         const response = await fetch(cloudinaryUrl, {
@@ -122,15 +100,19 @@ export default function HomePage() {
         setLastImageUrl(imageUrl);
 
         await analyzeIdeas(imageUrl);
-        setCameraState("results");
+        setShowResults(true);
       } catch (error) {
         setErrorMessage(error instanceof Error ? error.message : "Unknown error");
-        setCameraState("results");
+        setShowResults(true);
       } finally {
         setIsLoading(false);
+        // 重置 input，允许重复选择同一文件
+        if (fileInputRef.current) {
+          fileInputRef.current.value = "";
+        }
       }
     },
-    [analyzeIdeas, mediaStream, user?.id]
+    [analyzeIdeas, user?.id]
   );
 
   const handleRetry = useCallback(async () => {
@@ -146,28 +128,28 @@ export default function HomePage() {
     }
   }, [analyzeIdeas, lastImageUrl]);
 
+  const handleCameraClick = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <>
       <SignedIn>
-        {cameraState === "active" ? (
-          <CameraView
-            onExit={handleExit}
-            onCapture={handleCapture}
-            isLoading={isLoading}
-          />
-        ) : cameraState === "results" ? (
+        {showResults ? (
           <ResultsView
             ideas={ideas}
             errorMessage={errorMessage}
             onRetry={handleRetry}
             onBack={() => {
               setIdeas([]);
-              setCameraState("idle");
+              setShowResults(false);
             }}
             onRetake={() => {
               setIdeas([]);
               setErrorMessage("");
-              setCameraState("active");
+              setShowResults(false);
+              // 延迟触发文件选择，让 UI 先更新
+              setTimeout(() => fileInputRef.current?.click(), 100);
             }}
           />
         ) : (
@@ -181,16 +163,42 @@ export default function HomePage() {
                   <div className="mb-4">Collecting inspiration, please wait...</div>
                 )}
                 {!isLoading && (
-                  <CameraButton
-                    onCameraStart={(stream) => {
-                      setMediaStream(stream);
-                      setErrorMessage("");
-                      setCameraState("active");
-                    }}
-                    onError={(msg) => {
-                      setErrorMessage(msg);
-                    }}
-                  />
+                  <>
+                    {/* 隐藏的 input，使用系统相机 */}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      capture="environment"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={handleCameraClick}
+                      className="flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transition-colors"
+                    >
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="w-6 h-6"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
+                        />
+                      </svg>
+                      PLAY
+                    </button>
+                  </>
                 )}
               </div>
             </AuroraBackground>
