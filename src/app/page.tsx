@@ -201,6 +201,7 @@ export default function HomePage() {
         {showResults ? (
           <ResultsView
             ideas={visibleIdeas}
+            isStreamFinished={isStreamFinished}
             errorMessage={errorMessage}
             onRetry={handleRetry}
             onBack={() => {

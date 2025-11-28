@@ -18,6 +18,7 @@ interface ResultsViewProps {
   onBack?: () => void;
   errorMessage?: string;
   onRetry?: () => void;
+  isStreamFinished: boolean;
 }
 
 const CARD_OFFSET = 60;
@@ -39,6 +40,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   onBack,
   errorMessage,
   onRetry,
+  isStreamFinished,
 }: ResultsViewProps) => {
   const displayIdeas = ideas.slice(0, 5);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -78,7 +80,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
           />
         )}
 
-        <div className="relative w-full max-w-md" style={{ height: `${displayIdeas.length * 60 + 200}px` }}>
+        <div className="relative w-full max-w-md" style={{ height: `${(displayIdeas.length + (!isStreamFinished ? 1 : 0)) * 60 + 200}px` }}>
           {displayIdeas.map((idea, index) => {
             const isExpanded = expandedIndex === index;
             let displayOrder = displayIdeas.length - 1 - index;
@@ -228,6 +230,36 @@ const ResultsView: React.FC<ResultsViewProps> = ({
               </motion.div>
             );
           })}
+
+          {/* Loading Card */}
+          {!isStreamFinished && (
+            <motion.div
+              key="loading-card"
+              className="absolute w-full"
+              style={{
+                zIndex: 5, // Below the last card (which is 10+)
+                transformOrigin: 'center center'
+              }}
+              initial={{
+                y: displayIdeas.length * CARD_OFFSET,
+                scale: 1 - (displayIdeas.length * SCALE_FACTOR),
+                opacity: 0,
+              }}
+              animate={{
+                y: displayIdeas.length * CARD_OFFSET,
+                scale: 1 - (displayIdeas.length * SCALE_FACTOR),
+                opacity: 1,
+              }}
+              transition={{ duration: 0.3 }}
+            >
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border border-gray-200 h-[180px] flex flex-col items-center justify-center gap-3">
+                <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                <p className="text-gray-500 font-medium text-sm animate-pulse">
+                  Generating Idea {displayIdeas.length + 1}...
+                </p>
+              </div>
+            </motion.div>
+          )}
         </div>
       </div>
 
