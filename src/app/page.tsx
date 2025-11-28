@@ -34,6 +34,15 @@ export default function HomePage() {
   const [isMobile, setIsMobile] = useState(false);
   const [language, setLanguage] = useState("en");
 
+  const LANGUAGES = [
+    { code: "en", label: "English", flag: "🇺🇸", short: "EN" },
+    { code: "zh", label: "中文", flag: "🇨🇳", short: "ZH" },
+    { code: "fr", label: "Français", flag: "🇫🇷", short: "FR" },
+    { code: "ja", label: "日本語", flag: "🇯🇵", short: "JA" },
+  ];
+
+  const currentLang = LANGUAGES.find(l => l.code === language) || LANGUAGES[0];
+
   // 检测是否为移动设备
   useEffect(() => {
     const checkMobile = () => {
@@ -217,28 +226,32 @@ export default function HomePage() {
                       onChange={handleFileChange}
                       className="hidden"
                     />
-                    <div className="flex flex-col gap-4 items-center">
-                      <select
-                        value={language}
-                        onChange={(e) => setLanguage(e.target.value)}
-                        className="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 appearance-none text-center cursor-pointer"
-                        style={{
-                          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
-                          backgroundPosition: "right 0.5rem center",
-                          backgroundRepeat: "no-repeat",
-                          backgroundSize: "1.5em 1.5em",
-                          paddingRight: "2.5rem"
-                        }}
-                      >
-                        <option value="en" className="text-gray-800">🇺🇸 English</option>
-                        <option value="zh" className="text-gray-800">🇨🇳 中文</option>
-                        <option value="fr" className="text-gray-800">🇫🇷 Français</option>
-                        <option value="ja" className="text-gray-800">🇯🇵 日本語</option>
-                      </select>
+                    <div className="flex items-center gap-3 relative z-20">
+                      {/* Native Select with Custom Overlay */}
+                      <div className="relative shrink-0 w-16 h-12">
+                        {/* The Visual Layer (What user sees) */}
+                        <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white">
+                          <span className="text-lg leading-none">{currentLang.flag}</span>
+                          <span className="text-[10px] font-bold leading-none tracking-wider">{currentLang.short}</span>
+                        </div>
+                        
+                        {/* The Functional Layer (Native Select, invisible but clickable) */}
+                        <select
+                          value={language}
+                          onChange={(e) => setLanguage(e.target.value)}
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none"
+                        >
+                          {LANGUAGES.map((lang) => (
+                            <option key={lang.code} value={lang.code} className="text-gray-800">
+                              {lang.flag} {lang.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
 
                       <button
                         onClick={handleCameraClick}
-                        className="flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30"
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 min-w-[140px]"
                       >
                       {isMobile ? (
                         <>
@@ -261,7 +274,7 @@ export default function HomePage() {
                               d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"
                             />
                           </svg>
-                          📸 拍照
+                          PLAY
                         </>
                       ) : (
                         <>
