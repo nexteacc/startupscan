@@ -230,7 +230,7 @@ export default function HomePage() {
                       {/* Native Select with Custom Overlay */}
                       <div className="relative shrink-0 w-16 h-12">
                         {/* The Visual Layer (What user sees) */}
-                        <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-white/20 backdrop-blur-md border border-white/30 text-white">
+                        <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-gray-200 border border-gray-200 text-gray-900">
                           <span className="text-lg leading-none">{currentLang.flag}</span>
                           <span className="text-[10px] font-bold leading-none tracking-wider">{currentLang.short}</span>
                         </div>
@@ -242,7 +242,7 @@ export default function HomePage() {
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer appearance-none"
                         >
                           {LANGUAGES.map((lang) => (
-                            <option key={lang.code} value={lang.code} className="text-gray-800">
+                            <option key={lang.code} value={lang.code} className="text-gray-900">
                               {lang.flag} {lang.label}
                             </option>
                           ))}
@@ -251,7 +251,7 @@ export default function HomePage() {
 
                       <button
                         onClick={handleCameraClick}
-                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30 min-w-[140px]"
+                        className="flex-1 flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-600 rounded-2xl shadow-lg min-w-[140px]"
                       >
                       {isMobile ? (
                         <>

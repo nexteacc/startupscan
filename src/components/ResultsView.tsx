@@ -48,12 +48,12 @@ const ResultsView: React.FC<ResultsViewProps> = ({
   return (
     <div 
       ref={scrollRef}
-      className="min-h-screen h-[100dvh] bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col pt-8 overflow-y-auto relative"
+      className="min-h-screen h-[100dvh] bg-gray-100 flex flex-col pt-8 overflow-y-auto relative"
     >
 
 
       <div className="text-center pb-8">
-        <h1 className="text-3xl font-bold text-gray-800">Next BIG TOY</h1>
+        <h1 className="text-3xl font-bold text-gray-900">Next BIG TOY</h1>
       </div>
 
       <div className="flex-1 flex flex-col items-center px-4 relative">
@@ -62,7 +62,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/30 z-30"
+            className="fixed inset-0 bg-gray-900/50 z-30"
             onClick={handleBackgroundClick}
           />
         )}
@@ -129,22 +129,22 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                 >
                   <div className={`p-5 ${isExpanded ? 'pb-8' : ''}`}> 
                     <div className="text-center mb-4">
-                      <h2 className="text-lg font-semibold text-gray-700">
+                      <h2 className="text-lg font-semibold text-gray-900">
                         Idea Kit {index + 1}
                       </h2>
                     </div>
 
                     {!isExpanded && (
                       <div className="space-y-3">
-                        <div className="bg-blue-50 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-700 text-xs mb-1">Idea Source</h3>
-                          <p className="text-gray-600 text-xs leading-snug line-clamp-2">
+                        <div className="bg-gray-100 rounded-xl p-3">
+                          <h3 className="font-medium text-blue-600 text-xs mb-1">Idea Source</h3>
+                          <p className="text-gray-700 text-xs leading-snug line-clamp-2">
                             {idea.source}
                           </p>
                         </div>
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-gray-700 text-xs mb-1">Market Potential</h3>
-                          <p className="text-gray-500 text-xs leading-snug line-clamp-2">
+                          <h3 className="font-medium text-blue-600 text-xs mb-1">Market Potential</h3>
+                          <p className="text-gray-700 text-xs leading-snug line-clamp-2">
                             {idea.market_potential}
                           </p>
                         </div>
@@ -158,32 +158,32 @@ const ResultsView: React.FC<ResultsViewProps> = ({
                         transition={{ duration: 0.25, delay: 0.1 }}
                         className="space-y-3"
                       >
-                        <div className="bg-blue-50 rounded-xl p-3">
-                          <h3 className="font-medium text-blue-700 text-sm mb-1">Idea Source</h3>
+                        <div className="bg-gray-100 rounded-xl p-3">
+                          <h3 className="font-medium text-blue-600 text-sm mb-1">Idea Source</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.source}
                           </p>
                         </div>
                         <div className="bg-gray-100 rounded-xl p-3">
-                          <h3 className="font-medium text-gray-700 text-sm mb-1">Market Potential</h3>
+                          <h3 className="font-medium text-blue-600 text-sm mb-1">Market Potential</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.market_potential}
                           </p>
                         </div>
-                        <div className="bg-green-50 rounded-xl p-3">
-                          <h3 className="font-medium text-green-700 text-sm mb-1">Strategy</h3>
+                        <div className="bg-gray-100 rounded-xl p-3">
+                          <h3 className="font-medium text-blue-600 text-sm mb-1">Strategy</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.strategy}
                           </p>
                         </div>
-                        <div className="bg-purple-50 rounded-xl p-3">
-                          <h3 className="font-medium text-purple-700 text-sm mb-1">Marketing</h3>
+                        <div className="bg-gray-100 rounded-xl p-3">
+                          <h3 className="font-medium text-blue-600 text-sm mb-1">Marketing</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.marketing}
                           </p>
                         </div>
-                        <div className="bg-orange-50 rounded-xl p-3">
-                          <h3 className="font-medium text-orange-700 text-sm mb-1">Target Audience</h3>
+                        <div className="bg-gray-100 rounded-xl p-3">
+                          <h3 className="font-medium text-blue-600 text-sm mb-1">Target Audience</h3>
                           <p className="text-gray-700 text-sm leading-relaxed">
                             {idea.target_audience}
                           </p>
@@ -198,7 +198,7 @@ const ResultsView: React.FC<ResultsViewProps> = ({
         </div>
       </div>
 
-      <div className="px-6 pb-24 pt-4 flex flex-col items-center gap-4 shrink-0">
+      <div className="px-6 pb-32 pt-4 flex flex-col items-center gap-4 shrink-0" style={{ paddingBottom: 'max(8rem, env(safe-area-inset-bottom, 2rem))' }}>
         {errorMessage && (
           <div className="text-red-500 text-sm text-center max-w-md">
             {errorMessage}
@@ -208,14 +208,14 @@ const ResultsView: React.FC<ResultsViewProps> = ({
           {onBack && (
             <button
               onClick={onBack}
-              className="w-full py-3 px-4 rounded-3xl border border-blue-200 text-blue-600 text-base font-medium bg-white shadow"
+              className="w-full py-3 px-4 rounded-3xl border-2 border-gray-200 text-gray-700 text-base font-medium bg-white shadow"
             >
               Back Home
             </button>
           )}
           <button
             onClick={onRetake}
-            className="w-full py-3 px-4 bg-blue-500 text-white rounded-3xl text-base font-medium transition-colors hover:bg-blue-600 shadow"
+            className="w-full py-3 px-4 bg-blue-600 text-white rounded-3xl text-base font-medium shadow"
           >
             Retake Photo
           </button>

@@ -38,30 +38,30 @@ export default function RootLayout({
           publishableKey={clerkPubKey}
           appearance={{
             variables: {
-              colorPrimary: "#3b82f6",
+              colorPrimary: "#2563eb",
               colorBackground: "#ffffff",
-              colorInputBackground: "#f8fafc",
+              colorInputBackground: "#f3f4f6",
               colorTextOnPrimaryBackground: "#ffffff",
-              colorText: "#1e293b",
-              colorTextSecondary: "#64748b",
+              colorText: "#374151",
+              colorTextSecondary: "#374151",
               borderRadius: "0.75rem",
             },
             elements: {
-              card: "bg-white shadow-lg w-[90%] max-w-[380px] mx-auto p-5 rounded-xl border border-gray-100",
+              card: "bg-white shadow-lg w-[90%] max-w-[380px] mx-auto p-5 rounded-xl border border-gray-200",
               formButtonPrimary:
-                "bg-gradient-to-r from-blue-500 to-indigo-500 text-sm h-10 hover:from-blue-600 hover:to-indigo-600 transition-colors",
+                "bg-blue-600 text-sm h-10",
               formFieldInput:
-                "bg-gray-50 border-gray-200 text-sm text-gray-900",
+                "bg-gray-100 border-gray-200 text-sm text-gray-900",
               socialButtonsIconButton:
-                "bg-gray-50 hover:bg-gray-100 scale-95 p-1.5 rounded-lg transition-all duration-200 border border-gray-200",
+                "bg-gray-100 scale-95 p-1.5 rounded-lg border border-gray-200",
               socialButtonsProviderIcon: "w-5 h-5 opacity-90 hover:opacity-100",
               footer: "hidden",
               rootBox: "w-full px-4 py-2",
               headerTitle: "text-xl font-semibold text-gray-900 mb-6",
-              formFieldLabel: "text-sm text-gray-600 mb-1",
+              formFieldLabel: "text-sm text-gray-700 mb-1",
               formFieldInput__input: "h-10",
               dividerRow: "my-3",
-              dividerText: "text-sm text-gray-500",
+              dividerText: "text-sm text-gray-700",
               formFieldError: "text-red-500 text-xs mt-1",
             },
           }}
