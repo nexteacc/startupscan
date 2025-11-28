@@ -32,6 +32,7 @@ export default function HomePage() {
   const [lastImageUrl, setLastImageUrl] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const [language, setLanguage] = useState("en");
 
   // 检测是否为移动设备
   useEffect(() => {
@@ -53,6 +54,7 @@ export default function HomePage() {
         body: JSON.stringify({
           userId: user?.id ?? "defaultUserId",
           image_url: imageUrl,
+          language: language,
         }),
       });
 
@@ -100,7 +102,7 @@ export default function HomePage() {
         }
       }
     },
-    [user?.id]
+    [user?.id, language]
   );
 
   const handleFileChange = useCallback(
@@ -215,10 +217,29 @@ export default function HomePage() {
                       onChange={handleFileChange}
                       className="hidden"
                     />
-                    <button
-                      onClick={handleCameraClick}
-                      className="flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transition-colors"
-                    >
+                    <div className="flex flex-col gap-4 items-center">
+                      <select
+                        value={language}
+                        onChange={(e) => setLanguage(e.target.value)}
+                        className="px-4 py-2 rounded-xl bg-white/20 backdrop-blur-md border border-white/30 text-white focus:outline-none focus:ring-2 focus:ring-blue-400 appearance-none text-center cursor-pointer"
+                        style={{
+                          backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e")`,
+                          backgroundPosition: "right 0.5rem center",
+                          backgroundRepeat: "no-repeat",
+                          backgroundSize: "1.5em 1.5em",
+                          paddingRight: "2.5rem"
+                        }}
+                      >
+                        <option value="en" className="text-gray-800">🇺🇸 English</option>
+                        <option value="zh" className="text-gray-800">🇨🇳 中文</option>
+                        <option value="fr" className="text-gray-800">🇫🇷 Français</option>
+                        <option value="ja" className="text-gray-800">🇯🇵 日本語</option>
+                      </select>
+
+                      <button
+                        onClick={handleCameraClick}
+                        className="flex items-center justify-center gap-2 px-6 py-3 text-white bg-blue-500 rounded-2xl hover:bg-blue-600 transition-colors shadow-lg shadow-blue-500/30"
+                      >
                       {isMobile ? (
                         <>
                           <svg
@@ -261,7 +282,8 @@ export default function HomePage() {
                           上传图片
                         </>
                       )}
-                    </button>
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
