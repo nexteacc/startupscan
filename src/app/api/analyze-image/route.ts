@@ -70,14 +70,20 @@ function buildSystemPrompt(
 
 export async function POST(request: Request) {
   if (!process.env.OPENAI_API_KEY) {
-    return new Response("OPENAI_API_KEY is not configured", { status: 500 });
+    return new Response(JSON.stringify({ error: "OPENAI_API_KEY is not configured" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" }
+    });
   }
 
   try {
     const { userId, image_url, language = "en" } = await request.json();
 
     if (!userId || !image_url) {
-      return new Response("userId and image_url are required", { status: 400 });
+      return new Response(JSON.stringify({ error: "userId and image_url are required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" }
+      });
     }
 
     const languageConfig = getLanguageConfig(language);
@@ -104,12 +110,32 @@ export async function POST(request: Request) {
       temperature: 1.2,
     });
 
-    return result.toTextStreamResponse();
+    // Create a custom stream that sends partial objects as JSON
+    const encoder = new TextEncoder();
+    const stream = new ReadableStream({
+      async start(controller) {
+        for await (const partialObject of result.partialObjectStream) {
+          const data = JSON.stringify(partialObject) + '\n';
+          controller.enqueue(encoder.encode(data));
+        }
+        controller.close();
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+      },
+    });
   } catch (error) {
     console.error("Analyze image failed:", error);
     return new Response(
-      error instanceof Error ? error.message : "Unknown error",
-      { status: 500 }
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unknown error" }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      }
     );
   }
 }

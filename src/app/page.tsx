@@ -63,14 +63,14 @@ export default function HomePage() {
 
         buffer += decoder.decode(value, { stream: true });
 
-        // Try to parse the latest complete object
+        // Parse complete JSON objects (one per line)
         const lines = buffer.split("\n");
-        for (let i = 0; i < lines.length - 1; i++) {
-          const line = lines[i].trim();
-          if (line.startsWith("0:")) {
+        buffer = lines.pop() || ""; // Keep incomplete line in buffer
+
+        for (const line of lines) {
+          if (line.trim()) {
             try {
-              const jsonStr = line.substring(2);
-              const parsed = JSON.parse(jsonStr);
+              const parsed = JSON.parse(line);
               if (parsed.ideas && Array.isArray(parsed.ideas)) {
                 setIdeas(
                   parsed.ideas.map((idea: Idea) => ({
@@ -83,11 +83,10 @@ export default function HomePage() {
                 );
               }
             } catch (e) {
-              // Ignore parse errors for incomplete JSON
+              console.error('[Stream Parse Error]', e);
             }
           }
         }
-        buffer = lines[lines.length - 1];
       }
     },
     [user?.id]
